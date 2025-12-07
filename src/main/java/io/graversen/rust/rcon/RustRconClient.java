@@ -3,8 +3,8 @@ package io.graversen.rust.rcon;
 import io.graversen.rust.rcon.util.EventEmitter;
 import io.graversen.rust.rcon.util.JsonMapper;
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
