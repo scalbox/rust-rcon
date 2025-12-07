@@ -5,8 +5,8 @@ import io.graversen.rust.rcon.RustRconRouter;
 import io.graversen.rust.rcon.protocol.util.PlayerName;
 import io.graversen.rust.rcon.protocol.util.SteamId64;
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 

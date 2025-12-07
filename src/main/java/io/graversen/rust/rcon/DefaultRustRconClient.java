@@ -18,8 +18,8 @@ import lombok.SneakyThrows;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.framing.CloseFrame;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;

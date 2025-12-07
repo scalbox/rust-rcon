@@ -4,8 +4,7 @@ import io.graversen.rust.rcon.RustServer;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @ToString(callSuper = true)

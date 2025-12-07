@@ -2,8 +2,8 @@ package io.graversen.rust.rcon.protocol.util;
 
 import lombok.NonNull;
 import lombok.Value;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -11,7 +11,8 @@ import java.util.function.Supplier;
 public class SteamId64 implements Supplier<String> {
     public static final int LENGTH = 17;
 
-    @NonNull String value;
+    @NonNull
+    String value;
 
     public static Optional<SteamId64> parse(@Nullable String value) {
         if (value == null) {

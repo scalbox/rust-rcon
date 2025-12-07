@@ -1,0 +1,85 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'io.graversen'
+version = '2.0.0-alpha.1'
+
+// Dependency versions
+ext {
+    lombokVersion = '1.18.42'
+    logbackVersion = '1.5.21'
+    guavaVersion = '33.5.0-jre'
+    commonsTextVersion = '1.14.0'
+    javaWebsocketVersion = '1.5.3'
+    jacksonDatabindVersion = '2.20.1'
+    reflectionsVersion = '0.9.12'
+    junitVersion = '5.9.2'
+    junitPlatformLauncher = '1.9.2'
+    mockitoVersion = '5.20.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri('https://jitpack.io')
+    }
+}
+
+dependencies {
+    // JSpecify
+    implementation 'org.jspecify:jspecify:1.0.0'
+    
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Runtime dependencies
+    implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+    implementation "com.google.guava:guava:${guavaVersion}"
+    implementation "org.apache.commons:commons-text:${commonsTextVersion}"
+    implementation "org.java-websocket:Java-WebSocket:${javaWebsocketVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
+    implementation "org.reflections:reflections:${reflectionsVersion}"
+
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:${junitPlatformLauncher}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//        }
+//    }
+//    repositories {
+//        maven {
+//            name = 'GitHubPackages'
+//            url = uri('https://maven.pkg.github.com/MrGraversen/rust-rcon')
+//            credentials {
+//                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+//                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+//            }
+//        }
+//    }
+//}

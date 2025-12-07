@@ -7,8 +7,8 @@ import io.graversen.rust.rcon.protocol.player.PlayerManagement;
 import io.graversen.rust.rcon.tasks.RconTask;
 import io.graversen.rust.rcon.util.EventEmitter;
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
