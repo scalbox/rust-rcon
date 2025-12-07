@@ -1,4 +1,4 @@
-# Rust RCON :video_game:
+# Rust RCON V2 :video_game:
 An asynchronous, fault-tolerant Rust RCON client built in Java.  
 Seamlessly integrates with Rust's RCON request-response semantics using websocket connections.  
 Ideal for those looking to harness the power of Rust's RCON with Java's portability and ease.
