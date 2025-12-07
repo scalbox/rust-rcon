@@ -123,5 +123,7 @@ buildNumber.properties
 # End of https://www.gitignore.io/api/java,maven,intellij+all
 
 /src/main/resources/
+# Exception for Gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
 .gradle/
 build/
