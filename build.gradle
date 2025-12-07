@@ -1,0 +1,63 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'io.graversen'
+version = '0.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri('https://jitpack.io')
+    }
+}
+
+dependencies {
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    // Runtime dependencies
+    implementation 'ch.qos.logback:logback-classic:1.4.6'
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'org.java-websocket:Java-WebSocket:1.5.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+    implementation 'org.reflections:reflections:0.9.12'
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testImplementation 'org.mockito:mockito-core:5.3.1'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/MrGraversen/rust-rcon')
+            credentials {
+                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+            }
+        }
+    }
+}
