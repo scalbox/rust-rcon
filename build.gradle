@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.graversen'
-version = '0.0.0'
+version = '2.0.0-alpha.1'
 
 // Dependency versions
 ext {
@@ -63,20 +63,20 @@ test {
     useJUnitPlatform()
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            name = 'GitHubPackages'
-            url = uri('https://maven.pkg.github.com/MrGraversen/rust-rcon')
-            credentials {
-                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
-                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
-            }
-        }
-    }
-}
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//        }
+//    }
+//    repositories {
+//        maven {
+//            name = 'GitHubPackages'
+//            url = uri('https://maven.pkg.github.com/MrGraversen/rust-rcon')
+//            credentials {
+//                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+//                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+//            }
+//        }
+//    }
+//}
