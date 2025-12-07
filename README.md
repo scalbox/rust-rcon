@@ -58,9 +58,9 @@ You must create a GitHub Personal Access Token to facilitate this access. It mus
 
 ```xml
 <dependency>
-    <groupId>io.graversen</groupId>
+    <groupId>com.scalbox</groupId>
     <artifactId>rust-rcon</artifactId>
-    <version>${io.graversen.rust.rcon-version}</version>
+    <version>${com.scalbox.rust.rcon-version}</version>
 </dependency>
 ```
 

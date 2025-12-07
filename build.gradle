@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'io.graversen'
+group = 'com.scalbox'
 version = '2.0.0-alpha.1'
 
 // Dependency versions
