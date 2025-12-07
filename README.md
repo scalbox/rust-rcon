@@ -1,4 +1,4 @@
-# Rust RCON :video_game:
+# Rust RCON V2 :video_game:
 An asynchronous, fault-tolerant Rust RCON client built in Java.  
 Seamlessly integrates with Rust's RCON request-response semantics using websocket connections.  
 Ideal for those looking to harness the power of Rust's RCON with Java's portability and ease.
@@ -58,9 +58,9 @@ You must create a GitHub Personal Access Token to facilitate this access. It mus
 
 ```xml
 <dependency>
-    <groupId>io.graversen</groupId>
+    <groupId>com.scalbox</groupId>
     <artifactId>rust-rcon</artifactId>
-    <version>${io.graversen.rust.rcon-version}</version>
+    <version>${com.scalbox.rust.rcon-version}</version>
 </dependency>
 ```
 
