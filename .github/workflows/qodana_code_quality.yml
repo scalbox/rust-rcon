@@ -23,6 +23,7 @@ jobs:
         uses: JetBrains/qodana-action@v2025.2
         with:
           pr-mode: false
+          args: -Dproject.open.type=Gradle  # or Maven
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1191860526 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
