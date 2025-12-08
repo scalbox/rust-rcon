@@ -94,7 +94,7 @@ publishing {
             // Artifact ID (project name)
             groupId = 'com.scalbox'
             artifactId = 'rust-rcon'
-//            version = '2.0.0-alpha.2'
+//            version = '<version>'
 
             pom {
                 name = 'rust-rcon'
