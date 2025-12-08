@@ -144,7 +144,7 @@ publishing {
 
                 scm {
                     connection = 'scm:git:git://github.com/tuousername/tuoprogetto.git'
-                    developerConnection = 'scm:git:ssh://github.com:tuousername/tuoprogetto.git'
+                    developerConnection = 'scm:git:ssh://github.com/tuousername/tuoprogetto.git'
                     url = 'https://github.com/tuousername/tuoprogetto'
                 }
 
