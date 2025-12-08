@@ -69,6 +69,10 @@ test {
     useJUnitPlatform()
 }
 
+tasks.withType(Javadoc).configureEach {
+    failOnError = false
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
