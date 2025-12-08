@@ -70,14 +70,13 @@ test {
     useJUnitPlatform()
 }
 
-tasks.javadoc {
-    // For lombok
-    classpath += sourceSets.main.compileClasspath
-}
-
-tasks.withType(Javadoc).configureEach {
-    failOnError = false
-}
+//tasks.javadoc {
+//    options.addStringOption('Xdoclint:none', '-quiet')
+//    // For lombok
+//    classpath += sourceSets.main.compileClasspath
+//    // For lombok
+//    failOnError = false
+//}
 
 publishing {
     publications {

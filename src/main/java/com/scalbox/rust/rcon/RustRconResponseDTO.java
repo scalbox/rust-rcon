@@ -3,17 +3,27 @@ package com.scalbox.rust.rcon;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor(onConstructor_ = @JsonCreator)
 public class RustRconResponseDTO {
     @JsonProperty("Identifier")
-    private Integer identifier;
+    private final Integer identifier;
     @JsonProperty("Message")
-    private String message;
+    private final String message;
     @JsonProperty("Type")
-    private String type;
+    private final String type;
     @JsonProperty("Stacktrace")
-    private String stackTrace;
+    private final String stackTrace;
+
+    @JsonCreator
+    public RustRconResponseDTO(
+            @JsonProperty("Identifier") Integer identifier,
+            @JsonProperty("Message") String message,
+            @JsonProperty("Type") String type,
+            @JsonProperty("Stacktrace") String stackTrace) {
+        this.identifier = identifier;
+        this.message = message;
+        this.type = type;
+        this.stackTrace = stackTrace;
+    }
 }
