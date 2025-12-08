@@ -42,7 +42,7 @@ LATEST Version
 <dependency>
     <groupId>com.scalbox</groupId>
     <artifactId>rust-rcon</artifactId>
-    <version>2.0.0-alpha.2</version>
+    <version>2.0.0-alpha.3</version>
 </dependency>
 ```
 
@@ -67,7 +67,7 @@ LATEST Version
 2. Gradle:
 
 ```groovy
-implementation("com.scalbox:rust-rcon:2.0.0-alpha.2")
+implementation("com.scalbox:rust-rcon:2.0.0-alpha.3")
 ```
 
 ```groovy
