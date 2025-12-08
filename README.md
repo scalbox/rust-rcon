@@ -55,6 +55,15 @@ LATEST Version
 </dependency>
 ```
 
+```xml
+
+<dependency>
+    <groupId>org.java-websocket</groupId>
+    <artifactId>Java-WebSocket</artifactId>
+    <version>1.6.0</version>
+</dependency>
+```
+
 2. Gradle:
 
 ```groovy
@@ -63,6 +72,10 @@ implementation("com.scalbox:rust-rcon:2.0.0-alpha.2")
 
 ```groovy
 implementation("com.google.guava:guava:33.5.0-jre")
+```
+
+```groovy
+implementation("org.java-websocket:Java-WebSocket:1.6.0")
 ```
 
 3. Now you can use Rust RCON in your Java project!
