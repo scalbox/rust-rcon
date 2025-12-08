@@ -40,10 +40,22 @@ LATEST Version
 </dependency>
 ```
 
+```xml
+<dependency>
+    <groupId>com.google.guava</groupId>
+    <artifactId>guava</artifactId>
+    <version>33.5.0-jre</version>
+</dependency>
+```
+
 2. Gradle:
 
-```gradle
+```groovy
 implementation("com.scalbox:rust-rcon:2.0.0-alpha.2")
+```
+
+```groovy
+implementation("com.google.guava:guava:33.5.0-jre")
 ```
 
 3. Now you can use Rust RCON in your Java project!
