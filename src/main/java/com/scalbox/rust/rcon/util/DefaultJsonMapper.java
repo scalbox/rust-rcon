@@ -2,6 +2,7 @@ package com.scalbox.rust.rcon.util;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
@@ -26,8 +27,8 @@ public class DefaultJsonMapper implements JsonMapper {
     @Override
     @SneakyThrows
     public <T> List<T> fromJsonArray(@NonNull String json, @NonNull Class<T> toClass) {
-        final T[] jsonArray = (T[]) getObjectMapper().readValue(json, toClass.arrayType());
-        return List.of(jsonArray);
+        CollectionType listType = getObjectMapper().getTypeFactory().constructCollectionType(List.class, toClass);
+        return getObjectMapper().readValue(json, listType);
     }
 
     @Synchronized
