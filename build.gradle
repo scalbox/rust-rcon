@@ -157,10 +157,10 @@ tasks.register('verifyPublishConfig') {
         println "Group: ${project.group}"
         println "Artifact: ${publishing.publications.mavenJava.artifactId}"
         println "Version: ${project.version}"
-        println "OSSRH Username configured: ${System.getenv('OSSRH_USERNAME') != null}"
-        println "OSSRH Password configured: ${System.getenv('OSSRH_PASSWORD') != null}"
-        println "GPG Key configured: ${System.getenv('GPG_PRIVATE_KEY') != null}"
-        println "GPG Passphrase configured: ${System.getenv('GPG_PASSPHRASE') != null}"
+        println "OSSRH Username configured: ${project.findProperty("ossrhUsername") ?: System.getenv('OSSRH_USERNAME') != null}"
+        println "OSSRH Password configured: ${project.findProperty("ossrhPassword") ?: System.getenv('OSSRH_PASSWORD') != null}"
+        println "GPG Key configured: ${project.findProperty("gpgPrivateKey") ?: System.getenv('GPG_PRIVATE_KEY') != null}"
+        println "GPG Passphrase configured: ${project.findProperty("gpgPassphrase") ?: System.getenv('GPG_PASSPHRASE') != null}"
     }
 }
 

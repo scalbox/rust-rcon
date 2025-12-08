@@ -127,3 +127,4 @@ buildNumber.properties
 !gradle/wrapper/gradle-wrapper.jar
 .gradle/
 build/
+/gradle.properties
