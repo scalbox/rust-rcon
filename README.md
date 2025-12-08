@@ -20,48 +20,30 @@ In the context of Rust, RCON serves as a potent tool for administrators and thir
 
 ## Installation :floppy_disk:
 
-Rust RCON is available through Maven from GitHub Packages. To install:
+Rust RCON is available through **Maven Central Repository**.
 
-:warning: **Even though this project is public, you still need to authenticate properly with GitHub Packages**
+Repository: 
 
-From the documentation:
-> If you want to download and use a package from a public repository, you don't need access to the repository. However, you must be authenticated to GitHub Packages under a user account that has a GitHub Free plan.
+> https://central.sonatype.com/artifact/com.scalbox/rust-rcon
 
-You must create a GitHub Personal Access Token to facilitate this access. It must have at least the `read:packages` scope.
+> https://repo1.maven.org/maven2/com/scalbox/rust-rcon/
 
-[**Click here**](https://github.com/settings/tokens/new?scopes=read:packages&description=Rust+Rcon+GitHub+Packages+Access) to easily create one.
+LATEST Version
 
-1. Configure Maven settings.xml: Place this token in your ~/.m2/settings.xml (or the equivalent on your system).
-
-```xml
-<servers>
-  <server>
-    <id>github</id>
-    <username>YOUR_GITHUB_USERNAME</username>
-    <password>YOUR_PERSONAL_ACCESS_TOKEN</password>
-  </server>
-</servers>
-```
-
-2. Add the GitHub Packages repository in your `pom.xml`:
-
-```xml
-<repositories>
-    <repository>
-        <id>github</id>
-        <url>https://maven.pkg.github.com/MrGraversen/rust-rcon</url>
-    </repository>
-</repositories>
-```
-
-2. Next, add the Rust RCON dependency:
+1. Maven:
 
 ```xml
 <dependency>
     <groupId>com.scalbox</groupId>
     <artifactId>rust-rcon</artifactId>
-    <version>${com.scalbox.rust.rcon-version}</version>
+    <version>2.0.0-alpha.2</version>
 </dependency>
+```
+
+2. Gradle:
+
+```gradle
+implementation("com.scalbox:rust-rcon:2.0.0-alpha.2")
 ```
 
 3. Now you can use Rust RCON in your Java project!
