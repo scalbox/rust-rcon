@@ -174,7 +174,7 @@ After a few hours, your artifact will be visible at:
 2. The GPG key is **published** to a keyserver:
 
    ```bash
-   gpg --keyserver keyserver.ubuntu.com --send-keys 0BEB6534E91C3C1F2883055105655D26854D9CAF
+   gpg --keyserver keyserver.ubuntu.com --send-keys KEY_ID
    ```
 
 3. All files have the `.asc` signature.
