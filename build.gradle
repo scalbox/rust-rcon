@@ -70,13 +70,18 @@ test {
     useJUnitPlatform()
 }
 
-//tasks.javadoc {
-//    options.addStringOption('Xdoclint:none', '-quiet')
+tasks.javadoc {
+    options.addStringOption('Xdoclint:none', '-quiet')
 //    // For lombok
 //    classpath += sourceSets.main.compileClasspath
 //    // For lombok
 //    failOnError = false
-//}
+}
+
+// Se stai usando anche il task compileJava
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-Xlint:-missing']
+}
 
 publishing {
     publications {
