@@ -1,19 +1,20 @@
-# Pubblicazione Manuale su Maven Central tramite Central Portal
+# Manual Publishing to Maven Central via Central Portal
 
-Questa guida spiega come generare gli artefatti localmente, creare un bundle ZIP con la struttura corretta e caricarlo manualmente su **Sonatype Central Portal**.
+This guide explains how to generate artifacts locally, create a ZIP bundle with the correct folder structure, and upload it manually to **Sonatype Central Portal**.
 
 ---
 
-## Passo 1: Genera gli artefatti localmente
+## Step 1: Generate artifacts locally
 
-Nel `build.gradle`, rimuovi il plugin `nexusPublishing` e configura solo la pubblicazione locale:
+In `build.gradle`, remove the `nexusPublishing` plugin and configure only local publishing:
 
 ```groovy
 plugins {
     id 'java'
     id 'maven-publish'
     id 'signing'
-    // RIMUOVI nexusPublishing per ora
+    // REMOVE nexusPublishing for now
+    // id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
 // ... existing code ...
@@ -37,9 +38,9 @@ publishing {
 
                 developers {
                     developer {
-                        id = 'tuoid'
-                        name = 'Tuo Nome'
-                        email = 'tua@email.com'
+                        id = 'yourid'
+                        name = 'Your Name'
+                        email = 'you@email.com'
                     }
                 }
 
@@ -52,7 +53,7 @@ publishing {
         }
     }
 
-    // Add
+    // For: Local repository
     repositories {
         maven {
             name = "Local"
@@ -69,25 +70,25 @@ signing {
 
 ---
 
-## Passo 2: Pubblica localmente
+## Step 2: Publish locally
 
 ```bash
 ./gradlew clean publishToMavenLocal
 ```
 
-Oppure:
+Or:
 
 ```bash
 ./gradlew clean publishMavenJavaPublicationToLocalRepository
 ```
 
-Questo crea tutti gli artefatti firmati in:
+This creates all signed artifacts in:
 
 ```text
 build/repo/com/scalbox/rust-rcon/<version>/
 ```
 
-esempio
+example
 
 ```text
 build/repo/com/scalbox/rust-rcon/2.0.0/
@@ -95,33 +96,33 @@ build/repo/com/scalbox/rust-rcon/2.0.0/
 
 ---
 
-## Passo 3: Crea il bundle ZIP con la struttura corretta
+## Step 3: Create the ZIP bundle with the correct structure
 
-Lo ZIP deve contenere la **struttura di cartelle completa**:
+The ZIP **must** contain the full folder structure:
 
 ```text
 com/scalbox/rust-rcon/<version>/
 ```
 
-### Passo 3.1: Vai nella cartella `build/repo`
+### Step 3.1: Go to the `build/repo` folder
 
 ```powershell
 cd build\repo
 ```
 
-### Passo 3.2: Comprimi partendo da lì
+### Step 3.2: Compress from there
 
 ```powershell
 Compress-Archive -Path com -DestinationPath ..\..\rust-rcon-<VERSION>-bundle.zip
 ```
 
-esempio
+example
 
 ```powershell
 Compress-Archive -Path com -DestinationPath ..\..\rust-rcon-2.0.0-bundle.zip
 ```
 
-In questo modo il contenuto dello ZIP sarà:
+This way, the ZIP content will be:
 
 ```text
 com/
@@ -136,71 +137,71 @@ com/
         rust-rcon-2.0.0-javadoc.jar.asc
         rust-rcon-2.0.0-sources.jar
         rust-rcon-2.0.0-sources.jar.asc
-        ... (tutti gli altri file)
+        ... (all the other files)
 ```
 
 ---
 
-## Passo 4: Carica su Central Portal
+## Step 4: Upload to Central Portal
 
-1. Vai su: <https://central.sonatype.com/>
-2. Fai login con Google SSO.
-3. Nel menu a sinistra, clicca su **"Publish"**.
-4. Clicca su **"Upload Component"** (o **"Upload Bundle"**).
-5. Seleziona il file `rust-rcon-2.0.0-bundle.zip`.
-6. Clicca su **"Upload"**.
-7. Il sistema verificherà:
-    - ✔️ Che tutti i file siano firmati con GPG
-    - ✔️ Che il POM sia valido
-    - ✔️ Che ci siano javadoc e sources
-8. Se tutto è OK, clicca su **"Publish"**.
-9. La pubblicazione su Maven Central richiede **qualche ora** (fino a 24h).
+1. Go to: <https://central.sonatype.com/>
+2. Log in with Google SSO.
+3. In the left menu, click **"Publish"**.
+4. Click **"Upload Component"** (or **"Upload Bundle"**).
+5. Select the file `rust-rcon-2.0.0-bundle.zip`.
+6. Click **"Upload"**.
+7. The system will check:
+    - ✔️ All files are signed with GPG
+    - ✔️ The POM is valid
+    - ✔️ Javadoc and sources are present
+8. If everything is OK, click **"Publish"**.
+9. Publishing to Maven Central takes **a few hours** (up to 24h).
 
-### Verifica la pubblicazione
+### Verify the publication
 
-Dopo qualche ora, il tuo artefatto sarà visibile su:
+After a few hours, your artifact will be visible at:
 
 - **Maven Central Search:**  
   <https://search.maven.org/artifact/com.scalbox/rust-rcon/2.0.0/jar>
-- **Repository diretto:**  
+- **Direct repository:**  
   <https://repo1.maven.org/maven2/com/scalbox/rust-rcon/2.0.0/>
 
-### Note importanti
+### Important notes
 
-⚠️ Prima di caricare, assicurati che:
+⚠️ Before uploading, make sure that:
 
-1. Il namespace `com.scalbox` sia verificato su <https://central.sonatype.com/> (menu **"Namespaces"**).
-2. La chiave GPG sia **pubblicata** su un keyserver:
+1. The `com.scalbox` namespace is verified on <https://central.sonatype.com/> (menu **"Namespaces"**).
+2. The GPG key is **published** to a keyserver:
 
    ```bash
    gpg --keyserver keyserver.ubuntu.com --send-keys 0BEB6534E91C3C1F2883055105655D26854D9CAF
    ```
 
-3. Tutti i file abbiano la firma `.asc`.
+3. All files have the `.asc` signature.
 
 ---
 
-## Comandi completi
+## Full commands
 
-Dalla **root del progetto**:
+From the **project root**:
 
 ```powershell
-# Genera gli artefatti
+# Generate artifacts
 ./gradlew clean publishMavenJavaPublicationToLocalRepository
 
-# Vai in build/repo
+# Go to build/repo
 cd build\repo
 
-# Crea il bundle con la struttura corretta
-Compress-Archive -Path com -DestinationPath ..\..\rust-rcon-<VERSION>-bundle.zip -Force
+# Create the bundle with the correct structure
+# Compress-Archive -Path com -DestinationPath ..\..\rust-rcon-<VERSION>-bundle.zip -Force
 
-esempio
+# example
 
-# Crea il bundle con la struttura corretta
+# Create the bundle with the correct structure
 Compress-Archive -Path com -DestinationPath ..\..\rust-rcon-2.0.0-bundle.zip -Force
 
-# Torna indietro
+# Go back
 cd ..\..
 ```
 
-Ora il file `rust-rcon-2.0.0-bundle.zip` nella root del progetto è pronto per essere caricato su **Central Portal**.
+Now the file `rust-rcon-2.0.0-bundle.zip` in the project root is ready to be uploaded to **Central Portal**.
