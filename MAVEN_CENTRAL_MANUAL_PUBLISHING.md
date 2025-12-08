@@ -176,6 +176,10 @@ After a few hours, your artifact will be visible at:
    ```bash
    gpg --keyserver keyserver.ubuntu.com --send-keys KEY_ID
    ```
+   Or in case of error:
+   ```bash
+   gpg --keyserver hkp://keyserver.ubuntu.com:80 --send-keys YOUR_KEY_ID
+   ```
 
 3. All files have the `.asc` signature.
 

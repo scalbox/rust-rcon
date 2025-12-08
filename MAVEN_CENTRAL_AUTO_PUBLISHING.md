@@ -55,6 +55,9 @@ gpg --export-secret-keys ABCD1234EFGH5678 | base64 > gpg-secret.asc
 ```bash
 # Publish to multiple keyservers for reliability
 gpg --keyserver keyserver.ubuntu.com --send-keys ABCD1234EFGH5678
+# Or in case of error:
+gpg --keyserver hkp://keyserver.ubuntu.com:80 --send-keys ABCD1234EFGH5678
+
 gpg --keyserver keys.openpgp.org   --send-keys ABCD1234EFGH5678
 gpg --keyserver pgp.mit.edu        --send-keys ABCD1234EFGH5678
 ```
@@ -536,9 +539,14 @@ gh release create v2.0.0-alpha.2 \
 ```bash
 # Verify that the key is published
 gpg --keyserver keyserver.ubuntu.com --recv-keys YOUR_KEY_ID
+# Or in case of error:
+gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys YOUR_KEY_ID
 
 # Re-publish to multiple keyservers
 gpg --keyserver keyserver.ubuntu.com --send-keys YOUR_KEY_ID
+# Or in case of error:
+gpg --keyserver hkp://keyserver.ubuntu.com:80 --send-keys YOUR_KEY_ID
+
 gpg --keyserver keys.openpgp.org --send-keys YOUR_KEY_ID
 gpg --keyserver pgp.mit.edu --send-keys YOUR_KEY_ID
 
