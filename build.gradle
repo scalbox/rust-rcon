@@ -120,8 +120,8 @@ publishing {
 }
 
 signing {
-    def signingKey = System.getenv("GPG_PRIVATE_KEY")
-    def signingPassword = System.getenv("GPG_PASSPHRASE")
+    def signingKey = project.findProperty("gpgPrivateKey") ?: System.getenv("GPG_PRIVATE_KEY")
+    def signingPassword = project.findProperty("gpgPassphrase") ?: System.getenv("GPG_PASSPHRASE")
 
     if (signingKey != null && signingPassword != null) {
         useInMemoryPgpKeys(signingKey, signingPassword)
@@ -135,8 +135,8 @@ nexusPublishing {
         sonatype {
             nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username = System.getenv("OSSRH_USERNAME")
-            password = System.getenv("OSSRH_PASSWORD")
+            username = project.findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+            password = project.findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
         }
     }
 
