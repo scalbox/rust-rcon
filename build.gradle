@@ -40,7 +40,7 @@ repositories {
 dependencies {
     // JSpecify
     implementation 'org.jspecify:jspecify:1.0.0'
-    
+
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
