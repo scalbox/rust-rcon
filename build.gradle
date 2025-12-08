@@ -1,6 +1,8 @@
 plugins {
     id 'java-library'
-//    id 'maven-publish'
+    id 'maven-publish'
+    id 'signing'
+    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
 group = 'com.scalbox'
@@ -24,6 +26,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
+    withJavadocJar()
 }
 
 repositories {
@@ -64,6 +67,97 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            // Artifact ID (nome del tuo progetto)
+            artifactId = 'rust-rcon'
+
+            pom {
+                name = 'rust-rcon'
+                description = 'An async, fault-tolerant Java RCON client for the Rust game. Seamlessly integrate with Rust\'s RCON over websockets, translating game events into actionable insights.'
+                url = 'https://github.com/scalbox/rust-rcon'
+                inceptionYear = '2024'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = '1'
+                        name = 'Scalbox'
+                        email = 'info@scalbox.com'
+                        organization = 'Scalbox'
+                        organizationUrl = 'https://scalbox.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/scalbox/rust-rcon.git'
+                    developerConnection = 'scm:git:ssh://github.com:scalbox/rust-rcon.git'
+                    url = 'https://github.com/scalbox/rust-rcon'
+                }
+
+                issueManagement {
+                    system = 'GitHub'
+                    url = 'https://github.com/scalbox/rust-rcon/issues'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    def signingKey = System.getenv("GPG_PRIVATE_KEY")
+    def signingPassword = System.getenv("GPG_PASSPHRASE")
+
+    if (signingKey != null && signingPassword != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    }
+
+    sign publishing.publications.mavenJava
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username = System.getenv("OSSRH_USERNAME")
+            password = System.getenv("OSSRH_PASSWORD")
+        }
+    }
+
+    // Timeout per operazioni lente
+    connectTimeout.set(Duration.ofMinutes(3))
+    clientTimeout.set(Duration.ofMinutes(3))
+
+    // Transizione automatica dopo il close
+    transitionCheckOptions {
+        maxRetries.set(50)
+        delayBetween.set(Duration.ofSeconds(10))
+    }
+}
+
+// Task per verificare la configurazione
+tasks.register('verifyPublishConfig') {
+    doLast {
+        println "Group: ${project.group}"
+        println "Artifact: ${publishing.publications.mavenJava.artifactId}"
+        println "Version: ${project.version}"
+        println "OSSRH Username configured: ${System.getenv('OSSRH_USERNAME') != null}"
+        println "OSSRH Password configured: ${System.getenv('OSSRH_PASSWORD') != null}"
+        println "GPG Key configured: ${System.getenv('GPG_PRIVATE_KEY') != null}"
+        println "GPG Passphrase configured: ${System.getenv('GPG_PASSPHRASE') != null}"
+    }
 }
 
 //publishing {
