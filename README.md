@@ -42,40 +42,14 @@ LATEST Version
 <dependency>
     <groupId>com.scalbox</groupId>
     <artifactId>rust-rcon</artifactId>
-    <version>2.0.0-alpha.3</version>
-</dependency>
-```
-
-```xml
-
-<dependency>
-    <groupId>com.google.guava</groupId>
-    <artifactId>guava</artifactId>
-    <version>33.5.0-jre</version>
-</dependency>
-```
-
-```xml
-
-<dependency>
-    <groupId>org.java-websocket</groupId>
-    <artifactId>Java-WebSocket</artifactId>
-    <version>1.6.0</version>
+    <version>2.0.0-alpha.4</version>
 </dependency>
 ```
 
 2. Gradle:
 
 ```groovy
-implementation("com.scalbox:rust-rcon:2.0.0-alpha.3")
-```
-
-```groovy
-implementation("com.google.guava:guava:33.5.0-jre")
-```
-
-```groovy
-implementation("org.java-websocket:Java-WebSocket:1.6.0")
+implementation("com.scalbox:rust-rcon:2.0.0-alpha.4")
 ```
 
 3. Now you can use Rust RCON in your Java project!
