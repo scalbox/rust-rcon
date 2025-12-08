@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
+//    id 'maven-publish'
 }
 
 group = 'com.scalbox'
@@ -75,7 +75,7 @@ test {
 //    repositories {
 //        maven {
 //            name = 'GitHubPackages'
-//            url = uri('https://maven.pkg.github.com/MrGraversen/rust-rcon')
+//            url = uri('https://maven.pkg.github.com/Scalbox/rust-rcon')
 //            credentials {
 //                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
 //                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
