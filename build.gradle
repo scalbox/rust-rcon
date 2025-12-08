@@ -43,7 +43,7 @@ dependencies {
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-    
+
     // Java dependencies
     api "org.jspecify:jspecify:${jspecify}"
     api "ch.qos.logback:logback-classic:${logbackVersion}"
@@ -52,11 +52,11 @@ dependencies {
     api "org.java-websocket:Java-WebSocket:${javaWebsocketVersion}"
     api "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
     api "org.reflections:reflections:${reflectionsVersion}"
-    
+
     // Lombok for tests
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-    
+
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
