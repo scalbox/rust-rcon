@@ -162,13 +162,14 @@ publishing {
 
 ```groovy
 signing {
-    def signingKey = System.getenv('GPG_PRIVATE_KEY')
-    def signingPassword = System.getenv('GPG_PASSPHRASE')
+    def signingKey = project.findProperty("gpgPrivateKey") ?: System.getenv("GPG_PRIVATE_KEY")
+    def signingPassword = project.findProperty("gpgPassphrase") ?: System.getenv("GPG_PASSPHRASE")
 
     if (signingKey != null && signingPassword != null) {
         useInMemoryPgpKeys(signingKey, signingPassword)
     }
 
+    useGpgCmd()
     sign publishing.publications.mavenJava
 }
 ```
@@ -179,11 +180,10 @@ signing {
 nexusPublishing {
     repositories {
         sonatype {
-            nexusUrl.set(uri('https://s01.oss.sonatype.org/service/local/'))
-            snapshotRepositoryUrl.set(uri('https://s01.oss.sonatype.org/content/repositories/snapshots/'))
-
-            username = System.getenv('OSSRH_USERNAME')
-            password = System.getenv('OSSRH_PASSWORD')
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username = project.findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+            password = project.findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
         }
     }
 
@@ -207,11 +207,10 @@ tasks.register('verifyPublishConfig') {
         println "Group: ${project.group}"
         println "Artifact: ${publishing.publications.mavenJava.artifactId}"
         println "Version: ${project.version}"
-
-        println "OSSRH Username configured: ${System.getenv('OSSRH_USERNAME') != null}"
-        println "OSSRH Password configured: ${System.getenv('OSSRH_PASSWORD') != null}"
-        println "GPG Key configured: ${System.getenv('GPG_PRIVATE_KEY') != null}"
-        println "GPG Passphrase configured: ${System.getenv('GPG_PASSPHRASE') != null}"
+        println "OSSRH Username configured: ${project.findProperty("ossrhUsername") ?: System.getenv('OSSRH_USERNAME') != null}"
+        println "OSSRH Password configured: ${project.findProperty("ossrhPassword") ?: System.getenv('OSSRH_PASSWORD') != null}"
+        println "GPG Key configured: ${project.findProperty("gpgPrivateKey") ?: System.getenv('GPG_PRIVATE_KEY') != null}"
+        println "GPG Passphrase configured: ${project.findProperty("gpgPassphrase") ?: System.getenv('GPG_PASSPHRASE') != null}"
     }
 }
 ```
@@ -231,13 +230,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish (leave empty to use current)"
+        description: ''
         required: false
         type: string
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
@@ -250,7 +249,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'temurin'
+          distribution: 'adopt'
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
@@ -370,6 +369,9 @@ signing.secretKeyRingFile=/home/youruser/.gnupg/secring.gpg
 
 ossrhUsername=YOUR_SONATYPE_USERNAME
 ossrhPassword=YOUR_SONATYPE_PASSWORD
+
+gpgPassphrase=<YOUR_GPG_PASSPHRASE>
+gpgPrivateKey=<YOUR_GPG_PRIVATE_KEY_FILE_PATH>
 ```
 
 > **IMPORTANT:** Add `gradle.properties` to `.gitignore`!
