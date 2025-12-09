@@ -14,7 +14,7 @@ on:
         type: string
 
 jobs:
-  publish:
+  publish-to-github-packages:
     runs-on: ubuntu-22.04
     permissions:
       contents: read
