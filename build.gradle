@@ -165,13 +165,12 @@ publishing {
 }
 
 signing {
-    def signingKey = project.findProperty("gpgPrivateKey") ?: System.getenv("GPG_PRIVATE_KEY")
-    def signingPassword = project.findProperty("gpgPassphrase") ?: System.getenv("GPG_PASSPHRASE")
+    def signingKey = project.findProperty("gpgPrivateKey") ?: System.getenv('GPG_PRIVATE_KEY')
+    def signingPassword = project.findProperty("gpgPassphrase") ?: System.getenv('GPG_PASSPHRASE')
 
-    if (signingKey != null && signingPassword != null) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
-    }
+    required { signingKey != null && signingPassword != null }
 
+    useInMemoryPgpKeys(signingKey, signingPassword)
     useGpgCmd()
     sign publishing.publications.mavenJava
 }
