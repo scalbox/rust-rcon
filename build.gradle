@@ -168,11 +168,15 @@ signing {
     def signingKey = project.findProperty("gpgPrivateKey") ?: System.getenv('GPG_PRIVATE_KEY')
     def signingPassword = project.findProperty("gpgPassphrase") ?: System.getenv('GPG_PASSPHRASE')
 
-    required { signingKey != null && signingPassword != null }
+    // Sign ONLY when publishing to Maven Central (Sonatype)
+    required { gradle.taskGraph.hasTask("publishToSonatype") ||
+            gradle.taskGraph.hasTask("closeAndReleaseSonatypeStagingRepository") }
 
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    useGpgCmd()
-    sign publishing.publications.mavenJava
+    if (signingKey && signingPassword) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        useGpgCmd()
+        sign publishing.publications.mavenJava
+    }
 }
 
 // At the moment the auto-deployment on maven central does not work
