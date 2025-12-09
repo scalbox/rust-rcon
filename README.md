@@ -6,22 +6,32 @@ Ideal for those looking to harness the power of Rust's RCON with Java's portabil
 
 ## About :pencil:
 
-This library serves as a Rust (the video game) counterpart to the [**`minecraft-rcon`**](https://github.com/MrGraversen/minecraft-rcon) library.
+This library serves as a Rust (the video game) counterpart to the  
+[**`minecraft-rcon`**](https://github.com/MrGraversen/minecraft-rcon) library.
 
-It empowers applications with easy integration capabilities with a Rust game server via RCON, translating internal server details into actionable events.
+It empowers applications with easy integration capabilities with a Rust game server via RCON,  
+translating internal server details into actionable events.
 
-By interfacing with Rust's native RCON payloads, the library efficiently captures and translates in-game occurrences, such as player interactions including connections, chats,
-combats, and more, into events. This reactive design allows user-code to be promptly informed of player-driven actions.
+By interfacing with Rust's native RCON payloads, the library efficiently captures and translates  
+in-game occurrences — such as player connections, chats, combat and more — into events.  
+This reactive design allows user code to be promptly informed about player-driven and server-driven actions.
 
-Additionally, Rust RCON manages connection states intelligently, eliminating concerns about game server restarts. The connection is resilient; if the game server goes offline, it
-seamlessly recovers once the server becomes available again.
+Additionally, Rust RCON manages connection states intelligently, eliminating concerns about  
+game server restarts. The connection is resilient: if the game server goes offline, the client  
+automatically attempts to reconnect and seamlessly recovers once the server becomes available again.
 
 ### About RCON
 
 RCON (Remote Console) is a protocol that allows for remote game server management.  
-In the context of Rust, RCON serves as a potent tool for administrators and third-party applications to interact with and control game servers. Whether it's for issuing commands,
-retrieving information, or automating tasks, Rust's RCON implementation provides a secure and efficient interface for these operations, all without requiring direct access to the
-game server. This library, Rust RCON, simplifies and enhances the interaction with Rust's RCON system, offering a robust solution for various use cases.
+In the context of Rust, RCON is a powerful tool for administrators and developers who need to  
+monitor, control, and integrate with game servers.
+
+Whether it is issuing commands, retrieving information, or automating operational tasks,  
+Rust’s RCON implementation provides a flexible interface for these operations — all without  
+requiring direct access to the game server console.
+
+This library, Rust RCON V2, simplifies and enhances interaction with Rust’s RCON system by  
+providing a strongly-typed, event-driven Java client built around websocket communication.
 
 ## Installation :floppy_disk:
 
@@ -99,3 +109,16 @@ Rust RCON offers a plethora of events that give developers a detailed insight in
 
 * https://steamid.io/ - translate between Steam IDs
 * https://www.corrosionhour.com/rust-item-list/ - all Rust items, including shortcodes required by inventory rcon
+
+---
+
+## About Original Author :pencil:
+
+This repository (`Rust RCON V2`) started as an independent snapshot of the original  
+[MrGraversen/rust-rcon](https://github.com/MrGraversen/rust-rcon) project and has since evolved  
+as a separate codebase under the fork:
+
+> https://github.com/scalbox/rust-rcon
+
+For full attribution and licensing details (original MIT License and this fork’s Apache License 2.0),  
+see [CREDITS.md](CREDITS.md).
