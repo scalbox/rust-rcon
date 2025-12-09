@@ -135,9 +135,31 @@ publishing {
 
     // At the moment the auto-deployment on maven central does not work, so I deploy locally
     repositories {
+        
+        // Local repository
         maven {
             name = "Local"
             url = uri("${buildDir}/repo")
+        }
+
+//        // Maven Central
+//        maven {
+//            name = 'MavenCentral'
+//            url = uri('https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/')
+//            credentials {
+//                username = project.findProperty('mavenUsername') ?: System.getenv('OSSRH_USERNAME')
+//                password = project.findProperty('mavenPassword') ?: System.getenv('OSSRH_PASSWORD')
+//            }
+//        }
+
+        // GitHub Packages
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/Scalbox/rust-rcon')
+            credentials {
+                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+            }
         }
     }
 }
