@@ -101,7 +101,7 @@ Rust RCON offers a plethora of events that give developers a detailed insight in
 - **WsErrorEvent**: Triggered when there's an error in the websocket communication.
 - **WsClosedEvent**: Emitted when the websocket connection is closed, either due to errors or deliberate actions.
 
-<hr>
+---
 
 ## Examples :alembic:
 
@@ -118,7 +118,7 @@ public class DefaultRustRconClient {
 }
 ```
 
-<hr>
+---
 
 <h3> DefaultRustRconService </h3>
 
