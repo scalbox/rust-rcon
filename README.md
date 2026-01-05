@@ -145,7 +145,7 @@ Here are its main functions:
 
 To use the `DefaultRustRconService` class, you must follow a standard lifecycle: configuration, startup, interaction, and shutdown.
 
-Here are the main steps:
+### How to use it
 
 1. Instantiation: Create an instance by passing a `RustRconConfiguration` object with connection details (IP, port, password).
 2. Event Registration (Optional): If you want to react to events (e.g., chat messages, server logs), register your listeners before or after startup.
