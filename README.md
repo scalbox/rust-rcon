@@ -340,7 +340,20 @@ public class ClientUsage {
 
 ---
 
-<h3> What should be used between DefaultRustRconService, DefaultRustRconRouter, and DefaultRustRconClient? </h3>
+<h3> What should be used between</h3>
+
+```java
+public class DefaultRustRconService {
+}
+
+public class DefaultRustRconRouter {
+}
+
+public class DefaultRustRconClient {
+}
+```
+
+<h3> ? </h3>
 
 The choice depends on the level of abstraction and control you need for your application. Here's a quick guide to help you decide:
 
@@ -385,7 +398,7 @@ You should use this class **very rarely**, usually only if you're extending the 
 * Want a complete and easy app? Use **`DefaultRustRconService`**.
 * Want to just send raw commands without automation? Use **`DefaultRustRconRouter`**.
 
-<hr>
+---
 
 ## Useful Resources
 
