@@ -186,7 +186,7 @@ public class ExampleUsage {
 }
 ```
 
-<hr>
+---
 
 <h3> DefaultRustRconRouter </h3>
 
@@ -245,7 +245,7 @@ public class RouterUsageExample {
 }
 ```
 
-<hr>
+---
 
 <h3> DefaultRustRconClient </h3>
 
@@ -310,7 +310,7 @@ public class ClientUsage {
 }
 ```
 
-<hr>
+---
 
 <h3> What should be used between DefaultRustRconService, DefaultRustRconRouter, and DefaultRustRconClient? </h3>
 
