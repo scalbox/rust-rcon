@@ -82,6 +82,33 @@ class DefaultRustRconServiceTest {
         assertThrows(IllegalStateException.class, () -> service.schedule(new NoOpTask(), Duration.ofSeconds(1), null));
     }
 
+    @Test
+    void startTwiceIsRejectedWithoutSchedulingTasksAgain() throws Exception {
+        final var scheduler = new ScheduledThreadPoolExecutor(1);
+        scheduler.setRemoveOnCancelPolicy(true);
+        try {
+            final var service = new DefaultRustRconService(offlineConfiguration(), scheduler);
+            try {
+                service.start();
+
+                assertThrows(IllegalStateException.class, service::start);
+                assertEquals(INTERNAL_TASKS, scheduler.getQueue().size());
+            } finally {
+                service.stop();
+            }
+        } finally {
+            scheduler.shutdownNow();
+        }
+    }
+
+    @Test
+    void startAfterStopIsRejected() throws Exception {
+        final var service = new DefaultRustRconService(offlineConfiguration());
+        service.stop();
+
+        assertThrows(IllegalStateException.class, service::start);
+    }
+
     private static RustRconConfiguration offlineConfiguration() throws Exception {
         return new RustRconConfiguration("127.0.0.1", FakeRconServer.freePort(), "secret");
     }

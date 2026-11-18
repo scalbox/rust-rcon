@@ -58,7 +58,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * Default {@link RustRconService}: connects to a single Rust server over RCON, keeps the player, team and diagnostic
  * snapshots up to date through periodic tasks and exposes the management APIs.
  * <p>
- * {@link #stop()} closes the connection, cancels every task scheduled by the service and releases its scheduler.
+ * Lifecycle: {@link #start()} may be called once; {@link #stop()} closes the connection, cancels every task scheduled
+ * by the service and releases its scheduler. A stopped service cannot be started again: create a new instance.
  * Periodic tasks run on a scheduler created by the service (a single daemon thread), or on a
  * {@link ScheduledExecutorService} supplied by the caller, which allows many services to share the same threads.
  * A supplied scheduler is never shut down by the service.
@@ -127,13 +128,22 @@ public class DefaultRustRconService implements RustRconService {
 
     /**
      * Configures the event parsing, starts connecting to the server and schedules the internal tasks. The method does
-     * not wait for the connection to be established.
+     * not wait for the connection to be established. A service can be started only once: to connect again after
+     * {@link #stop()}, create a new instance.
+     *
+     * @throws IllegalStateException if the service has already been started or has been stopped
      */
     @Override
     public void start() {
+        if (isStopped.get()) {
+            throw new IllegalStateException(String.format("%s has been stopped and cannot be started again", getClass().getSimpleName()));
+        }
+        if (!isStarted.compareAndSet(false, true)) {
+            throw new IllegalStateException(String.format("%s has already been started", getClass().getSimpleName()));
+        }
+
         final var startedAt = LocalDateTime.now();
         log.debug("Starting {}", getClass().getSimpleName());
-        isStarted.set(true);
         rustEventService.get().configure();
         rustRconRouter.get().start();
         runConfigure();
