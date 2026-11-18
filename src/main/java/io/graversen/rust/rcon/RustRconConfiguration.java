@@ -16,17 +16,32 @@ package io.graversen.rust.rcon;
 
 import io.graversen.rust.rcon.event.RustEventSourceStrategy;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.Value;
 
 import java.util.Objects;
 
+/**
+ * Connection settings of a Rust server: host, RCON port, RCON password and the source of the game events.
+ * <p>
+ * {@link #toString()} never includes the password, so the configuration can be logged safely.
+ */
 @Value
 public class RustRconConfiguration {
     @NonNull String hostname;
     @NonNull Integer port;
+    @ToString.Exclude
     @NonNull String password;
     @NonNull RustEventSourceStrategy eventSourceStrategy;
 
+    /**
+     * Creates a configuration that parses the game events from the RCON console output
+     * ({@link RustEventSourceStrategy#RCON}).
+     *
+     * @param hostname host name or IP address of the Rust server
+     * @param port     RCON port of the Rust server
+     * @param password RCON password
+     */
     public RustRconConfiguration(
             @NonNull String hostname,
             @NonNull Integer port,
@@ -35,6 +50,14 @@ public class RustRconConfiguration {
         this(hostname, port, password, RustEventSourceStrategy.RCON);
     }
 
+    /**
+     * Creates a configuration.
+     *
+     * @param hostname            host name or IP address of the Rust server
+     * @param port                RCON port of the Rust server
+     * @param password            RCON password
+     * @param eventSourceStrategy source of the game events
+     */
     public RustRconConfiguration(
             @NonNull String hostname,
             @NonNull Integer port,

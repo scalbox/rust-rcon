@@ -18,6 +18,8 @@ import io.graversen.rust.rcon.event.RustEventSourceStrategy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RustRconConfigurationTest {
     @Test
@@ -37,5 +39,23 @@ class RustRconConfigurationTest {
         );
 
         assertEquals(RustEventSourceStrategy.UMOD, configuration.getEventSourceStrategy());
+    }
+
+    @Test
+    void toStringDoesNotExposeThePassword() {
+        final var configuration = new RustRconConfiguration("localhost", 28016, "s3cr3t-rcon-pass");
+
+        final var text = configuration.toString();
+
+        assertFalse(text.contains("s3cr3t-rcon-pass"), text);
+        assertTrue(text.contains("localhost"), text);
+        assertTrue(text.contains("28016"), text);
+    }
+
+    @Test
+    void passwordIsStillAvailableThroughTheGetter() {
+        final var configuration = new RustRconConfiguration("localhost", 28016, "s3cr3t-rcon-pass");
+
+        assertEquals("s3cr3t-rcon-pass", configuration.getPassword());
     }
 }
