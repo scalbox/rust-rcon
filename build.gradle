@@ -86,6 +86,14 @@ test {
     jvmArgumentProviders.add({ ["-javaagent:${configurations.mockitoAgent.singleFile}"] } as CommandLineArgumentProvider)
 }
 
+// Ship the license, and the credits with the original MIT notice, inside every published jar
+tasks.withType(Jar).configureEach {
+    from(rootDir) {
+        include 'LICENSE', 'CREDITS.md'
+        into 'META-INF'
+    }
+}
+
 tasks.javadoc {
     // Disable Javadoc warnings
     options.addStringOption('Xdoclint:none', '-quiet')
