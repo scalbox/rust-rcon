@@ -1,0 +1,6 @@
+plugins {
+    // Downloads the JDK required by the Java toolchain when it is not installed locally (e.g. in CI)
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'rust-rcon'

@@ -1,0 +1,246 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+// At the moment the auto-deployment on maven central does not work
+//    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
+}
+
+group = 'com.scalbox'
+version = '2.0.0-alpha.6'
+
+// Dependency versions
+ext {
+    jspecify = '1.0.1'
+    logbackVersion = '1.6.7'
+    guavaVersion = '33.8.0-jre'
+    commonsTextVersion = '1.15.0'
+    javaWebsocketVersion = '1.6.0'
+    // Jackson 2.x: Jackson 3 moves to the tools.jackson packages and would break the API
+    jacksonDatabindVersion = '2.23.0'
+    reflectionsVersion = '0.10.2'
+
+    lombokVersion = '1.18.48'
+    junitVersion = '6.1.3'
+    mockitoVersion = '5.24.0'
+}
+
+// Bytecode level of the published library (consumers need Java 17+)
+def javaRelease = 17
+
+java {
+    // JDK used to compile, test and generate Javadoc, whatever JDK runs Gradle
+    // (JDK 27 + Lombok currently crashes javac)
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    // Mockito as a Java agent: inline mocking without dynamic agent self-attach (JDK 21+)
+    mockitoAgent
+}
+
+dependencies {
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Java dependencies
+    api "org.jspecify:jspecify:${jspecify}"
+    api "ch.qos.logback:logback-classic:${logbackVersion}"
+    api "com.google.guava:guava:${guavaVersion}"
+    api "org.apache.commons:commons-text:${commonsTextVersion}"
+    api "org.java-websocket:Java-WebSocket:${javaWebsocketVersion}"
+    api "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
+    api "org.reflections:reflections:${reflectionsVersion}"
+
+    // Lombok for tests
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Test dependencies
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    mockitoAgent("org.mockito:mockito-core:${mockitoVersion}") { transitive = false }
+
+    // Test runtime dependencies
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgumentProviders.add({ ["-javaagent:${configurations.mockitoAgent.singleFile}"] } as CommandLineArgumentProvider)
+}
+
+tasks.javadoc {
+    // Disable Javadoc warnings
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.encoding = 'UTF-8'
+//    // For lombok
+//    classpath += sourceSets.main.compileClasspath
+//    // For lombok
+//    failOnError = false
+}
+
+// Disable Javadoc warnings if the compileJava task is also used
+tasks.withType(JavaCompile).configureEach {
+    // Sources are UTF-8 (some tests contain non-Latin player names)
+    options.encoding = 'UTF-8'
+    options.release = javaRelease
+    options.compilerArgs += ['-Xlint:unchecked', '-Xlint:-rawtypes']
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            // Artifact ID (project name)
+            groupId = 'com.scalbox'
+            artifactId = 'rust-rcon'
+//            version = '<version>'
+
+            pom {
+                name = 'rust-rcon'
+                description = 'An async, fault-tolerant Java RCON client for the Rust game. Seamlessly integrate with Rust\'s RCON over websockets, translating game events into actionable insights.'
+                url = 'https://github.com/scalbox/rust-rcon'
+                inceptionYear = '2025'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = '1'
+                        name = 'Scalbox'
+                        email = 'info@scalbox.com'
+                        organization = 'Scalbox'
+                        organizationUrl = 'https://scalbox.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/scalbox/rust-rcon.git'
+                    developerConnection = 'scm:git:ssh://github.com/scalbox/rust-rcon.git'
+                    url = 'https://github.com/scalbox/rust-rcon'
+                }
+
+                issueManagement {
+                    system = 'GitHub'
+                    url = 'https://github.com/scalbox/rust-rcon/issues'
+                }
+            }
+        }
+    }
+
+    // At the moment the auto-deployment on maven central does not work, so I deploy locally
+    repositories {
+        
+        // Local repository
+        maven {
+            name = "Local"
+            url = uri("${buildDir}/repo")
+        }
+
+//        // Maven Central
+//        maven {
+//            name = 'MavenCentral'
+//            url = uri('https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/')
+//            credentials {
+//                username = project.findProperty('mavenUsername') ?: System.getenv('OSSRH_USERNAME')
+//                password = project.findProperty('mavenPassword') ?: System.getenv('OSSRH_PASSWORD')
+//            }
+//        }
+
+        // GitHub Packages
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/Scalbox/rust-rcon')
+            credentials {
+                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+            }
+        }
+    }
+}
+
+signing {
+    def signingKey = project.findProperty("gpgPrivateKey") ?: System.getenv('GPG_PRIVATE_KEY')
+    def signingPassword = project.findProperty("gpgPassphrase") ?: System.getenv('GPG_PASSPHRASE')
+
+    // Sign ONLY when publishing to Maven Central (Sonatype)
+    required = { gradle.taskGraph.hasTask("publishToSonatype") ||
+            gradle.taskGraph.hasTask("closeAndReleaseSonatypeStagingRepository") }
+
+    if (signingKey && signingPassword) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        useGpgCmd()
+        sign publishing.publications.mavenJava
+    }
+}
+
+// At the moment the auto-deployment on maven central does not work
+//nexusPublishing {
+//    repositories {
+//        sonatype {
+//            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+//            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+//            username = project.findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+//            password = project.findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+//        }
+//    }
+//
+//    // Timeout for slow operations
+//    connectTimeout.set(Duration.ofMinutes(3))
+//    clientTimeout.set(Duration.ofMinutes(3))
+//
+//    // Automatic transition after close
+//    transitionCheckOptions {
+//        maxRetries.set(50)
+//        delayBetween.set(Duration.ofSeconds(10))
+//    }
+//}
+
+// Task to verify the configuration
+tasks.register('verifyPublishConfig') {
+    doLast {
+        println "Group: ${project.group}"
+        println "Artifact: ${publishing.publications.mavenJava.artifactId}"
+        println "Version: ${project.version}"
+        println "OSSRH Username configured: ${project.findProperty("ossrhUsername") ?: System.getenv('OSSRH_USERNAME') != null}"
+        println "OSSRH Password configured: ${project.findProperty("ossrhPassword") ?: System.getenv('OSSRH_PASSWORD') != null}"
+        println "GPG Key configured: ${project.findProperty("gpgPrivateKey") ?: System.getenv('GPG_PRIVATE_KEY') != null}"
+        println "GPG Passphrase configured: ${project.findProperty("gpgPassphrase") ?: System.getenv('GPG_PASSPHRASE') != null}"
+    }
+}
+
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//        }
+//    }
+//    repositories {
+//        maven {
+//            name = 'GitHubPackages'
+//            url = uri('https://maven.pkg.github.com/Scalbox/rust-rcon')
+//            credentials {
+//                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+//                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+//            }
+//        }
+//    }
+//}

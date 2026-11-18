@@ -1,0 +1,7 @@
+# Store text files with LF in the repository (same as upstream MrGraversen/rust-rcon),
+# so that upstream patches apply cleanly regardless of the local core.autocrlf setting.
+* text=auto
+
+*.bat text eol=crlf
+gradlew text eol=lf
+*.jar binary
