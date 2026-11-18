@@ -1,9 +1,23 @@
+/*
+ * This file is based on the open-source project "Rust RCON"
+ * (https://github.com/MrGraversen/rust-rcon), created by
+ * Martin Graversen and originally released under the MIT license.
+ *
+ * Original base package: io.graversen.rust.rcon
+ *
+ * The code in this fork
+ * (https://github.com/scalbox/rust-rcon) has been adapted and is
+ * maintained by scalbox and is distributed under the terms of the
+ * Apache License, Version 2.0. For more details, see the LICENSE
+ * file included in this repository.
+ */
+
 package io.graversen.rust.rcon.protocol.util;
 
 import lombok.NonNull;
 import lombok.Value;
-
 import org.jspecify.annotations.Nullable;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -11,7 +25,8 @@ import java.util.function.Supplier;
 public class SteamId64 implements Supplier<String> {
     public static final int LENGTH = 17;
 
-    @NonNull String value;
+    @NonNull
+    String value;
 
     public static Optional<SteamId64> parse(@Nullable String value) {
         if (value == null) {
