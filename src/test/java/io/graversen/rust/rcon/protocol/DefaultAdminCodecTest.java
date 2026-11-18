@@ -56,4 +56,36 @@ class DefaultAdminCodecTest {
         verify(rustRconRouter).send(rconMessageCaptor.capture());
         assertEquals("global.kick \"76561197979952036\" \"You are kicked m8\"", rconMessageCaptor.getValue().get());
     }
+
+    @Test
+    void banPlayerEscapesQuotesInNameAndReason() {
+        final var steamId = SteamId64.parseOrFail("76561197979952036");
+        final var playerName = new PlayerName("x\" \"evil");
+        final var reason = "said \"hi\" C:\\temp";
+        defaultAdminCodec.banPlayer(steamId, playerName, reason);
+
+        verify(rustRconRouter).send(rconMessageCaptor.capture());
+        assertEquals(
+                "global.banid \"76561197979952036\" \"x\\\" \\\"evil\" \"said \\\"hi\\\" C:\\\\temp\"",
+                rconMessageCaptor.getValue().get()
+        );
+    }
+
+    @Test
+    void kickPlayerEscapesQuotesInReason() {
+        final var steamId = SteamId64.parseOrFail("76561197979952036");
+        defaultAdminCodec.kickPlayer(steamId, "bye\" \"76561197979952037");
+
+        verify(rustRconRouter).send(rconMessageCaptor.capture());
+        assertEquals("global.kick \"76561197979952036\" \"bye\\\" \\\"76561197979952037\"", rconMessageCaptor.getValue().get());
+    }
+
+    @Test
+    void addOwnerEscapesQuotesInName() {
+        final var steamId = SteamId64.parseOrFail("76561197979952036");
+        defaultAdminCodec.addOwner(steamId, new PlayerName("Doc \"Delete\""));
+
+        verify(rustRconRouter).send(rconMessageCaptor.capture());
+        assertEquals("global.ownerid \"76561197979952036\" \"Doc \\\"Delete\\\"\"", rconMessageCaptor.getValue().get());
+    }
 }

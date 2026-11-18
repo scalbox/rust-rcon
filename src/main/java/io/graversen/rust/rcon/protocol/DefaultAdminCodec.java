@@ -28,8 +28,13 @@ import static io.graversen.rust.rcon.protocol.DefaultPlaceholders.DEFAULT_PLAYER
 import static io.graversen.rust.rcon.protocol.DefaultPlaceholders.DEFAULT_REASON;
 import static io.graversen.rust.rcon.protocol.RustProtocolTemplates.AdminProtocol.*;
 import static io.graversen.rust.rcon.protocol.RustProtocolTemplates.Placeholders.*;
+import static io.graversen.rust.rcon.protocol.util.RconArguments.escape;
 import static java.util.Objects.requireNonNullElse;
 
+/**
+ * Default {@link AdminCodec}: builds the administration console commands. Every value placed between double quotes
+ * in a command (Steam ID, player name, reason) is escaped, so that it is always passed as a single argument.
+ */
 public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
     public DefaultAdminCodec(@NonNull RustRconRouter rustRconRouter) {
         super(rustRconRouter);
@@ -40,8 +45,8 @@ public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
         final var rconMessage = compile(
                 KICK_PLAYER,
                 Map.of(
-                        stripped(STEAM_ID_64), steamId64.get(),
-                        stripped(REASON), requireNonNullElse(reason, DEFAULT_REASON)
+                        stripped(STEAM_ID_64), escape(steamId64.get()),
+                        stripped(REASON), escape(requireNonNullElse(reason, DEFAULT_REASON))
                 )
         );
         return send(rconMessage);
@@ -58,9 +63,9 @@ public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
         final var rconMessage = compile(
                 BAN_PLAYER,
                 Map.of(
-                        stripped(STEAM_ID_64), steamId64.get(),
-                        stripped(PLAYER_NAME), requireNonNullElse(playerName, DEFAULT_PLAYER_NAME).get(),
-                        stripped(REASON), requireNonNullElse(reason, DEFAULT_REASON)
+                        stripped(STEAM_ID_64), escape(steamId64.get()),
+                        stripped(PLAYER_NAME), escape(requireNonNullElse(playerName, DEFAULT_PLAYER_NAME).get()),
+                        stripped(REASON), escape(requireNonNullElse(reason, DEFAULT_REASON))
                 )
         );
         return send(rconMessage);
@@ -71,7 +76,7 @@ public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
         final var rconMessage = compile(
                 UNBAN_PLAYER,
                 Map.of(
-                        stripped(STEAM_ID_64), steamId64.get()
+                        stripped(STEAM_ID_64), escape(steamId64.get())
                 )
         );
         return send(rconMessage);
@@ -82,8 +87,8 @@ public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
         final var rconMessage = compile(
                 ADD_OWNER,
                 Map.of(
-                        stripped(STEAM_ID_64), steamId64.get(),
-                        stripped(PLAYER_NAME), requireNonNullElse(playerName, DEFAULT_PLAYER_NAME).get()
+                        stripped(STEAM_ID_64), escape(steamId64.get()),
+                        stripped(PLAYER_NAME), escape(requireNonNullElse(playerName, DEFAULT_PLAYER_NAME).get())
                 )
         );
         return send(rconMessage);
@@ -94,7 +99,7 @@ public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
         final var rconMessage = compile(
                 REMOVE_OWNER,
                 Map.of(
-                        stripped(STEAM_ID_64), steamId64.get()
+                        stripped(STEAM_ID_64), escape(steamId64.get())
                 )
         );
         return send(rconMessage);
@@ -105,7 +110,7 @@ public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
         final var rconMessage = compile(
                 MUTE_PLAYER,
                 Map.of(
-                        stripped(STEAM_ID_64), steamId64.get()
+                        stripped(STEAM_ID_64), escape(steamId64.get())
                 )
         );
         return send(rconMessage);
@@ -116,7 +121,7 @@ public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
         final var rconMessage = compile(
                 UNMUTE_PLAYER,
                 Map.of(
-                        stripped(STEAM_ID_64), steamId64.get()
+                        stripped(STEAM_ID_64), escape(steamId64.get())
                 )
         );
         return send(rconMessage);
@@ -145,7 +150,7 @@ public class DefaultAdminCodec extends DefaultRustCodec implements AdminCodec {
         final var rconMessage = compile(
                 TEAM_INFO,
                 Map.of(
-                        stripped(STEAM_ID_64), steamId64.get()
+                        stripped(STEAM_ID_64), escape(steamId64.get())
                 )
         );
         return send(rconMessage);
