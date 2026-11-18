@@ -60,6 +60,33 @@ class RustWebSocketClientTest {
     }
 
     @Test
+    void connectionLostDetectionIsEnabledByDefault() throws Exception {
+        try (var server = FakeRconServer.startNew();
+             var client = new RustWebSocketClient("127.0.0.1", server.getPort(), "secret", new EventBus())) {
+            assertTrue(client.connectBlocking(5, TimeUnit.SECONDS), "connection not opened");
+
+            assertEquals(60, client.getConnectionLostTimeout());
+            client.shutdown(Duration.ofSeconds(5));
+        }
+    }
+
+    @Test
+    void connectionLostTimeoutKeepsTheWholeDuration() throws Exception {
+        try (var server = FakeRconServer.startNew();
+             var client = new RustWebSocketClient("127.0.0.1", server.getPort(), "secret", new EventBus()) {
+                 @Override
+                 protected Duration connectionLostTimeout() {
+                     return Duration.ofSeconds(90);
+                 }
+             }) {
+            assertTrue(client.connectBlocking(5, TimeUnit.SECONDS), "connection not opened");
+
+            assertEquals(90, client.getConnectionLostTimeout());
+            client.shutdown(Duration.ofSeconds(5));
+        }
+    }
+
+    @Test
     void serverReceivesTheWholeEncodedPassword() throws Exception {
         try (var server = FakeRconServer.startNew();
              var client = new RustWebSocketClient("127.0.0.1", server.getPort(), SPECIAL_PASSWORD, new EventBus())) {

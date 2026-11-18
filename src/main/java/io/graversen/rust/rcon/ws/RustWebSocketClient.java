@@ -50,6 +50,11 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
     private static final String SERVER_URI_TEMPLATE = "ws://${hostname}:${port}/${password}";
     private static final String SERVER_URI_TEMPLATE_REDACTED = "ws://${hostname}:${port}/*";
 
+    /**
+     * Default interval of the connection-lost detection, see {@link #connectionLostTimeout()}.
+     */
+    public static final Duration DEFAULT_CONNECTION_LOST_TIMEOUT = Duration.ofSeconds(60);
+
     private final EventBus eventBus;
     private final String serverUriRedacted;
     private final AtomicBoolean isOpen;
@@ -108,7 +113,7 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
         }
 
         isOpen.set(true);
-        setConnectionLostTimeout(connectionLostTimeout().toSecondsPart());
+        setConnectionLostTimeout(toTimeoutSeconds(connectionLostTimeout()));
         eventBus.post(new WsOpenedEvent(serverUriRedacted));
     }
 
@@ -136,7 +141,7 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
         synchronized (closeMonitor) {
             closeMonitor.notifyAll();
         }
-        eventBus.post(new WsClosedEvent(serverUriRedacted, code, reason));
+        eventBus.post(new WsClosedEvent(serverUriRedacted, code, reason, remote));
     }
 
     /**
@@ -236,13 +241,30 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
     }
 
     /**
-     * Returns the interval used by the websocket to detect a lost connection through ping/pong frames.
-     * {@link Duration#ZERO} disables the detection.
+     * Returns the interval used to detect a lost connection. While the connection is open, a ping frame is sent
+     * at this interval; when no pong arrives within about one and a half intervals, the connection is closed with
+     * {@link CloseFrame#ABNORMAL_CLOSE}, which lets a reconnecting client connect again. {@link Duration#ZERO}
+     * disables the detection.
      *
-     * @return the connection-lost timeout; only its seconds part is used
+     * @return the connection-lost timeout, {@link #DEFAULT_CONNECTION_LOST_TIMEOUT} by default; it is rounded down
+     * to whole seconds
      */
     protected Duration connectionLostTimeout() {
-        return Duration.ZERO;
+        return DEFAULT_CONNECTION_LOST_TIMEOUT;
+    }
+
+    /**
+     * Converts the connection-lost timeout into the whole seconds expected by the WebSocket library. A {@code null}
+     * or negative value disables the detection, and very large values are capped.
+     *
+     * @param timeout the connection-lost timeout
+     * @return the timeout in seconds, {@code 0} when the detection is disabled
+     */
+    private static int toTimeoutSeconds(Duration timeout) {
+        if (timeout == null || timeout.isNegative()) {
+            return 0;
+        }
+        return (int) Math.min(Integer.MAX_VALUE, timeout.toSeconds());
     }
 
     /**

@@ -18,15 +18,39 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 
+/**
+ * Posted when the WebSocket connection is closed, or when a connection attempt fails.
+ */
 @Getter
 @ToString(callSuper = true)
 public class WsClosedEvent extends WsEvent {
     private final @NonNull Integer code;
     private final @NonNull String reason;
+    private final boolean remote;
 
+    /**
+     * Creates an event for a close initiated by this client.
+     *
+     * @param serverUri redacted URI of the server
+     * @param code      WebSocket close code
+     * @param reason    close reason
+     */
     public WsClosedEvent(@NonNull String serverUri, @NonNull Integer code, @NonNull String reason) {
+        this(serverUri, code, reason, false);
+    }
+
+    /**
+     * Creates an event.
+     *
+     * @param serverUri redacted URI of the server
+     * @param code      WebSocket close code
+     * @param reason    close reason
+     * @param remote    {@code true} if the close was initiated by the server
+     */
+    public WsClosedEvent(@NonNull String serverUri, @NonNull Integer code, @NonNull String reason, boolean remote) {
         super(serverUri);
         this.code = code;
         this.reason = reason;
+        this.remote = remote;
     }
 }

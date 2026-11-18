@@ -35,8 +35,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * {@link RustWebSocketClient} that reconnects automatically whenever the connection is closed with a code other than
- * {@link CloseFrame#NORMAL}, including when the first connection attempt fails.
+ * {@link RustWebSocketClient} that reconnects automatically whenever the connection is lost: when the server closes
+ * it, with any close code, when it is closed with a code other than {@link CloseFrame#NORMAL} (for example when the
+ * connection-lost detection gives up), and when a connection attempt fails. A normal close requested by this client,
+ * such as {@link #close()}, does not trigger a reconnection.
  * <p>
  * The delay between attempts grows exponentially from {@link #minReconnectDelay()} up to
  * {@link #maxReconnectDelay()}, with a random component, and returns to the minimum once a connection is opened.
@@ -103,14 +105,15 @@ public class ReconnectingRustWebSocketClient extends RustWebSocketClient {
     }
 
     /**
-     * Schedules a reconnection attempt when the connection is closed with a code other than {@link CloseFrame#NORMAL}
-     * and the client has not been shut down. The delay is given by {@link #reconnectDelay(int)}.
+     * Schedules a reconnection attempt when the client has not been shut down and the connection was either closed
+     * by the server, with any code, or closed with a code other than {@link CloseFrame#NORMAL}. The delay is given by
+     * {@link #reconnectDelay(int)}.
      *
      * @param wsClosedEvent the event posted when the connection was closed
      */
     @Subscribe
     public void onWsClosedEvent(@NonNull WsClosedEvent wsClosedEvent) {
-        if (isShutdown() || wsClosedEvent.getCode() == CloseFrame.NORMAL) {
+        if (isShutdown() || (wsClosedEvent.getCode() == CloseFrame.NORMAL && !wsClosedEvent.isRemote())) {
             return;
         }
 

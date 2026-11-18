@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.java_websocket.WebSocket;
 import org.java_websocket.framing.CloseFrame;
+import org.java_websocket.framing.Framedata;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.jspecify.annotations.Nullable;
@@ -43,6 +44,7 @@ public final class FakeRconServer extends WebSocketServer implements AutoCloseab
     private final CountDownLatch started = new CountDownLatch(1);
     private final AtomicInteger openedConnections = new AtomicInteger();
     private volatile @Nullable String lastResourceDescriptor;
+    private volatile boolean answerPings = true;
     private volatile Function<JsonNode, @Nullable String> responder =
             request -> response(request.get("Identifier").asInt(), "ok");
 
@@ -120,6 +122,33 @@ public final class FakeRconServer extends WebSocketServer implements AutoCloseab
      */
     public @Nullable String lastResourceDescriptor() {
         return lastResourceDescriptor;
+    }
+
+    /**
+     * Closes every open connection with the normal close code 1000, as a server shutting down cleanly would.
+     */
+    public void closeConnectionsNormally() {
+        getConnections().forEach(connection -> connection.close(CloseFrame.NORMAL, "server restart"));
+    }
+
+    /**
+     * Stops answering the ping frames sent by the clients, as a server that hangs without closing the socket would.
+     */
+    public void ignorePings() {
+        answerPings = false;
+    }
+
+    /**
+     * Answers a ping frame with a pong, unless {@link #ignorePings()} has been called.
+     *
+     * @param conn the connection that sent the ping
+     * @param f    the ping frame
+     */
+    @Override
+    public void onWebsocketPing(WebSocket conn, Framedata f) {
+        if (answerPings) {
+            super.onWebsocketPing(conn, f);
+        }
     }
 
     /**

@@ -98,6 +98,69 @@ class ReconnectingRustWebSocketClientTest {
         }
     }
 
+    @Test
+    void reconnectsWhenTheServerClosesNormally() throws Exception {
+        try (var server = FakeRconServer.startNew()) {
+            final var bus = new EventBus();
+            final var opened = new Semaphore(0);
+            bus.register(new OpenedListener(opened));
+            try (var client = new ReconnectingRustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus)) {
+                client.connect();
+                assertTrue(opened.tryAcquire(5, TimeUnit.SECONDS), "first connection not opened");
+
+                server.closeConnectionsNormally();
+
+                assertTrue(opened.tryAcquire(10, TimeUnit.SECONDS), "connection not reopened");
+                assertEquals(2, server.openedConnections());
+                client.shutdown(Duration.ofSeconds(5));
+            }
+        }
+    }
+
+    @Test
+    void noReconnectAfterACloseRequestedByTheClient() throws Exception {
+        try (var server = FakeRconServer.startNew()) {
+            final var bus = new EventBus();
+            final var opened = new Semaphore(0);
+            bus.register(new OpenedListener(opened));
+            try (var client = new ReconnectingRustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus)) {
+                client.connect();
+                assertTrue(opened.tryAcquire(5, TimeUnit.SECONDS), "connection not opened");
+
+                client.closeBlocking();
+
+                Thread.sleep(2500);
+                assertEquals(1, server.openedConnections());
+            }
+        }
+    }
+
+    @Test
+    void detectsADeadConnectionAndReconnects() throws Exception {
+        try (var server = FakeRconServer.startNew()) {
+            final var bus = new EventBus();
+            final var opened = new Semaphore(0);
+            bus.register(new OpenedListener(opened));
+            final var closedEvents = new AtomicInteger();
+            bus.register(new ClosedCounter(closedEvents));
+            try (var client = new ReconnectingRustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus) {
+                @Override
+                protected Duration connectionLostTimeout() {
+                    return Duration.ofSeconds(1);
+                }
+            }) {
+                client.connect();
+                assertTrue(opened.tryAcquire(5, TimeUnit.SECONDS), "first connection not opened");
+
+                server.ignorePings();
+
+                assertTrue(opened.tryAcquire(15, TimeUnit.SECONDS), "dead connection not detected and reopened");
+                assertTrue(closedEvents.get() >= 1, "close events: " + closedEvents.get());
+                client.shutdown(Duration.ofSeconds(5));
+            }
+        }
+    }
+
     public static final class OpenedListener {
         private final Semaphore opened;
 
