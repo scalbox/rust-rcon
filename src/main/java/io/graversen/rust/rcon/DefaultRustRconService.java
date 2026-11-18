@@ -30,7 +30,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;

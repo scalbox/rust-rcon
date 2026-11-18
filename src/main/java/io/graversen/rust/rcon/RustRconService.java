@@ -11,7 +11,7 @@ import io.graversen.rust.rcon.tasks.RconTask;
 import io.graversen.rust.rcon.util.EventEmitter;
 import lombok.NonNull;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;

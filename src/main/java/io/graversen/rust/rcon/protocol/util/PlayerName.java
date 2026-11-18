@@ -4,7 +4,7 @@ import io.graversen.rust.rcon.protocol.DefaultPlaceholders;
 import lombok.NonNull;
 import lombok.Value;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 import java.util.function.Supplier;
 

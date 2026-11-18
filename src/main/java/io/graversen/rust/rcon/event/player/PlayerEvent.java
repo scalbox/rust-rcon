@@ -4,7 +4,7 @@ import io.graversen.rust.rcon.event.RustEvent;
 import io.graversen.rust.rcon.protocol.util.SteamId64;
 import lombok.*;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @ToString

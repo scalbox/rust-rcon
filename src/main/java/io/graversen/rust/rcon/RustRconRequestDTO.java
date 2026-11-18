@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor(onConstructor_ = @JsonCreator)
 public class RustRconRequestDTO {
     @JsonProperty("Identifier")
     private final @NonNull Integer identifier;
@@ -15,4 +13,14 @@ public class RustRconRequestDTO {
     private final @NonNull String message;
     @JsonProperty("Name")
     private final @NonNull String name;
+
+    @JsonCreator
+    public RustRconRequestDTO(
+            @JsonProperty("Identifier") @NonNull Integer identifier,
+            @JsonProperty("Message") @NonNull String message,
+            @JsonProperty("Name") @NonNull String name) {
+        this.identifier = identifier;
+        this.message = message;
+        this.name = name;
+    }
 }

@@ -4,7 +4,7 @@ import io.graversen.rust.rcon.util.EventEmitter;
 import io.graversen.rust.rcon.util.JsonMapper;
 import lombok.NonNull;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;

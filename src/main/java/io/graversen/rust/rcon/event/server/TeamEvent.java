@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Set;
 
 @Getter

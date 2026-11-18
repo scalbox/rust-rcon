@@ -2,7 +2,7 @@ package io.graversen.rust.rcon;
 
 import lombok.*;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.time.LocalDateTime;
 
 @Getter
