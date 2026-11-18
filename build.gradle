@@ -29,8 +29,8 @@ ext {
     mockitoVersion = '5.24.0'
 }
 
-// Bytecode level of the published library (consumers need Java 17+)
-def javaRelease = 17
+// Bytecode level of the published library (consumers need Java 25+)
+def javaRelease = 25
 
 java {
     // JDK used to compile, test and generate Javadoc, whatever JDK runs Gradle

@@ -103,8 +103,9 @@ plugins {
 
 ```groovy
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 
     withSourcesJar()
     withJavadocJar()
@@ -248,11 +249,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
         with:
-          java-version: '17'
-          distribution: 'adopt'
+          java-version: '25'
+          distribution: 'zulu'
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
@@ -322,11 +323,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: '25'
+          distribution: 'zulu'
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew

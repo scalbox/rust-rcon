@@ -37,6 +37,8 @@ providing a strongly-typed, event-driven Java client built around websocket comm
 
 Rust RCON is available through **Maven Central Repository**.
 
+**Requirements:** Java 25 or later.
+
 Repository:
 
 > https://central.sonatype.com/artifact/com.scalbox/rust-rcon
@@ -77,6 +79,7 @@ implementation("com.scalbox:rust-rcon:2.0.0-beta.1")
 
 Changes that may affect existing code when upgrading to the next release:
 
+- **Java version**: the library now requires Java 25 or later (previously Java 17).
 - **Logging backend**: the library depends only on `slf4j-api` and no longer brings `logback-classic`.
   Add an SLF4J backend to your application (Spring Boot already includes one), otherwise SLF4J prints a warning
   and discards the log messages.
