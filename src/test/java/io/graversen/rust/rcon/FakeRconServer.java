@@ -42,6 +42,7 @@ public final class FakeRconServer extends WebSocketServer implements AutoCloseab
 
     private final CountDownLatch started = new CountDownLatch(1);
     private final AtomicInteger openedConnections = new AtomicInteger();
+    private volatile @Nullable String lastResourceDescriptor;
     private volatile Function<JsonNode, @Nullable String> responder =
             request -> response(request.get("Identifier").asInt(), "ok");
 
@@ -113,6 +114,15 @@ public final class FakeRconServer extends WebSocketServer implements AutoCloseab
     }
 
     /**
+     * Returns the raw request path of the last opened connection, which for an RCON client is {@code /password}.
+     *
+     * @return the request path, or {@code null} if no connection has been opened yet
+     */
+    public @Nullable String lastResourceDescriptor() {
+        return lastResourceDescriptor;
+    }
+
+    /**
      * Drops every open connection without a close handshake.
      */
     public void dropConnections() {
@@ -121,6 +131,7 @@ public final class FakeRconServer extends WebSocketServer implements AutoCloseab
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
+        lastResourceDescriptor = handshake.getResourceDescriptor();
         openedConnections.incrementAndGet();
     }
 

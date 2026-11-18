@@ -30,6 +30,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -285,7 +286,9 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
     }
 
     /**
-     * Builds the RCON endpoint URI {@code ws://hostname:port/password}.
+     * Builds the RCON endpoint URI {@code ws://hostname:port/password}. The password is percent-encoded as UTF-8,
+     * so characters such as {@code #}, {@code ?}, {@code /}, {@code %} or spaces stay part of the password instead
+     * of changing the structure of the URI.
      *
      * @param hostname host name or IP address of the Rust server
      * @param port     RCON port of the Rust server
@@ -302,9 +305,43 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
                 Map.of(
                         "hostname", hostname,
                         "port", port,
-                        "password", password
+                        "password", encodePathSegment(password)
                 )
         );
         return CommonUtils.uri(compiledServerUri);
+    }
+
+    /**
+     * Percent-encodes a value as UTF-8 so that it can be used as a single URI path segment. The characters allowed
+     * in a path segment by RFC 3986 (letters, digits, {@code - . _ ~ ! $ & ' ( ) * + , ; = : @}) are kept as they
+     * are; every other character, including {@code /}, {@code ?}, {@code #}, {@code %}, spaces and non-ASCII
+     * characters, is encoded.
+     *
+     * @param value the value to encode
+     * @return the encoded value
+     */
+    private static String encodePathSegment(@NonNull String value) {
+        final var encoded = new StringBuilder(value.length());
+        for (byte b : value.getBytes(StandardCharsets.UTF_8)) {
+            final int c = b & 0xFF;
+            if (isPathSegmentChar(c)) {
+                encoded.append((char) c);
+            } else {
+                encoded.append('%').append(Character.toUpperCase(Character.forDigit(c >> 4, 16)))
+                        .append(Character.toUpperCase(Character.forDigit(c & 0xF, 16)));
+            }
+        }
+        return encoded.toString();
+    }
+
+    /**
+     * Tells whether an ASCII character may appear unencoded in a URI path segment.
+     *
+     * @param c the character, as an unsigned byte value
+     * @return {@code true} for letters, digits and {@code - . _ ~ ! $ & ' ( ) * + , ; = : @}
+     */
+    private static boolean isPathSegmentChar(int c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+                || "-._~!$&'()*+,;=:@".indexOf(c) >= 0;
     }
 }
