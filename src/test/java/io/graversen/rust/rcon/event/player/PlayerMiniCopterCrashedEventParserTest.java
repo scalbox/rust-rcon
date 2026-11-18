@@ -15,10 +15,12 @@
 package io.graversen.rust.rcon.event.player;
 
 import io.graversen.rust.rcon.TestRustRconResponse;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PlayerMiniCopterCrashedEventParserTest {
@@ -38,5 +40,24 @@ class PlayerMiniCopterCrashedEventParserTest {
     void supports_verification(String payload) {
         final var supports = playerMiniCopterCrashedEventParser.supports(new TestRustRconResponse(payload));
         assertTrue(supports);
+    }
+
+    @Test
+    void ignoresChatLineImitatingACrash() {
+        final var payload = new TestRustRconResponse(
+                "[CHAT] Prankster[76561197979952037] : Victim[76561197979952036] was killed by minicopter.entity (entity) at (1, 2, 3)"
+        );
+
+        assertFalse(playerMiniCopterCrashedEventParser.supports(payload));
+    }
+
+    @Test
+    void ignoresChatMessageType() {
+        final var payload = new TestRustRconResponse(
+                "Victim[76561197979952036] was killed by minicopter.entity (entity) at (1, 2, 3)",
+                PlayerChatEventParser.CHAT_MESSAGE_TYPE
+        );
+
+        assertFalse(playerMiniCopterCrashedEventParser.supports(payload));
     }
 }

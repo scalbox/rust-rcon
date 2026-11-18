@@ -22,8 +22,15 @@ import lombok.NonNull;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
+/**
+ * Parses the console line written when a player disconnects, in the form
+ * {@code address:port/SteamID64/PlayerName disconnecting: reason}.
+ */
 public class PlayerDisconnectedEventParser extends BaseRustEventParser<PlayerDisconnectedEvent> {
+    private static final Pattern DISCONNECTED_PATTERN = Pattern.compile("^[^\\s/]+/\\d{17}/.*disconnecting:", Pattern.DOTALL);
+
     @Override
     protected Function<RustRconResponse, Optional<PlayerDisconnectedEvent>> eventParser() {
         return payload -> {
@@ -43,9 +50,16 @@ public class PlayerDisconnectedEventParser extends BaseRustEventParser<PlayerDis
         };
     }
 
+    /**
+     * Tells whether the message is a disconnection line. The line must start with the client address followed by
+     * the Steam ID, so chat messages are never supported, even if their text contains {@code disconnecting:}.
+     *
+     * @param payload the RCON message
+     * @return {@code true} if the message is a disconnection line
+     */
     @Override
     public boolean supports(@NonNull RustRconResponse payload) {
-        return payload.getMessage().contains("disconnecting:");
+        return !PlayerChatEventParser.isChat(payload) && DISCONNECTED_PATTERN.matcher(payload.getMessage()).find();
     }
 
     @Override

@@ -26,17 +26,49 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class PlayerChatEventParser extends BaseRustEventParser<PlayerChatEvent> {
+    /**
+     * RCON message type of the chat messages sent by the server as JSON.
+     */
+    public static final String CHAT_MESSAGE_TYPE = "Chat";
+
+    private static final String[] CHAT_PREFIXES = {"[CHAT] ", "[Global] ", "[TEAM CHAT] ", "[Team] "};
+
     private final Pattern CHAT_PATTERN = Pattern.compile("\\[CHAT\\] (.+)\\[(\\d+)\\] : (.+)");
     private final Pattern GLOBAL_CHAT_PATTERN = Pattern.compile("\\[Global\\] (.+?) : (.*)");
     private final Pattern TEAM_CHAT_PATTERN = Pattern.compile("\\[TEAM CHAT\\] (.+)\\[(\\d+)\\] : (.+)");
     private final Pattern SIMPLE_TEAM_CHAT_PATTERN = Pattern.compile("\\[Team\\] (.+?) : (.*)");
 
+    /**
+     * Tells whether a console line is a chat line, that is, whether it starts with {@code [CHAT] },
+     * {@code [Global] }, {@code [TEAM CHAT] } or {@code [Team] }.
+     *
+     * @param message the console line
+     * @return {@code true} if the line is a chat line
+     */
+    public static boolean hasChatPrefix(@NonNull String message) {
+        for (var prefix : CHAT_PREFIXES) {
+            if (message.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tells whether an RCON message carries text written by a player in chat: either a console chat line (see
+     * {@link #hasChatPrefix(String)}) or a message of type {@value #CHAT_MESSAGE_TYPE}. Parsers of other events use
+     * it to ignore text that a player could craft to look like a server line.
+     *
+     * @param payload the RCON message
+     * @return {@code true} if the message comes from chat
+     */
+    public static boolean isChat(@NonNull RustRconResponse payload) {
+        return CHAT_MESSAGE_TYPE.equalsIgnoreCase(payload.getType()) || hasChatPrefix(payload.getMessage());
+    }
+
     @Override
     public boolean supports(@NonNull RustRconResponse payload) {
-        return payload.getMessage().startsWith("[CHAT] ")
-                || payload.getMessage().startsWith("[Global] ")
-                || payload.getMessage().startsWith("[TEAM CHAT] ")
-                || payload.getMessage().startsWith("[Team] ");
+        return hasChatPrefix(payload.getMessage());
     }
 
     @Override

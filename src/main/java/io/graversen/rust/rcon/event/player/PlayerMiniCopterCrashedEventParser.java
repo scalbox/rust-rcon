@@ -24,12 +24,23 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+/**
+ * Parses the console line written when a player dies in a minicopter crash, in the form
+ * {@code PlayerName[SteamID64] was killed by minicopter.entity (entity) at (x, y, z)}.
+ */
 public class PlayerMiniCopterCrashedEventParser extends BaseRustEventParser<PlayerMiniCopterCrashedEvent> {
-    private static final Pattern DETAILS_PATTERN = Pattern.compile("^(.+?)\\[(\\d+)\\]");
+    private static final Pattern DETAILS_PATTERN = Pattern.compile("^(.+)\\[(\\d{17})\\] was killed by minicopter\\.entity \\(entity\\)");
 
+    /**
+     * Tells whether the message is a minicopter crash line. Chat messages are never supported, even if their text
+     * looks like a crash line.
+     *
+     * @param payload the RCON message
+     * @return {@code true} if the message is a minicopter crash line
+     */
     @Override
     public boolean supports(@NonNull RustRconResponse payload) {
-        return payload.getMessage().contains("was killed by minicopter.entity (entity)");
+        return !PlayerChatEventParser.isChat(payload) && DETAILS_PATTERN.matcher(payload.getMessage()).find();
     }
 
     @Override
