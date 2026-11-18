@@ -2,8 +2,8 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-// At the moment the auto-deployment on maven central does not work
-//    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
+    // Maven Central (Sonatype Central Portal, via its OSSRH Staging API)
+    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
 group = 'com.scalbox'
@@ -146,7 +146,7 @@ publishing {
         }
     }
 
-    // At the moment the auto-deployment on maven central does not work, so I deploy locally
+    // Maven Central is configured in the nexusPublishing block below
     repositories {
         
         // Local repository
@@ -186,33 +186,38 @@ signing {
             gradle.taskGraph.hasTask("closeAndReleaseSonatypeStagingRepository") }
 
     if (signingKey && signingPassword) {
+        // The GPG_PRIVATE_KEY secret holds the ASCII-armored key encoded in Base64; accept both forms
+        if (!signingKey.trim().startsWith('-----BEGIN')) {
+            signingKey = new String(signingKey.trim().decodeBase64(), 'UTF-8')
+        }
         useInMemoryPgpKeys(signingKey, signingPassword)
-        useGpgCmd()
         sign publishing.publications.mavenJava
     }
 }
 
-// At the moment the auto-deployment on maven central does not work
-//nexusPublishing {
-//    repositories {
-//        sonatype {
-//            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-//            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-//            username = project.findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
-//            password = project.findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
-//        }
-//    }
-//
-//    // Timeout for slow operations
-//    connectTimeout.set(Duration.ofMinutes(3))
-//    clientTimeout.set(Duration.ofMinutes(3))
-//
-//    // Automatic transition after close
-//    transitionCheckOptions {
-//        maxRetries.set(50)
-//        delayBetween.set(Duration.ofSeconds(10))
-//    }
-//}
+// Maven Central via the Central Portal OSSRH Staging API (the old s01.oss.sonatype.org was shut down in 2025).
+// Credentials: a Central Portal user token (central.sonatype.com -> Account -> Generate User Token).
+// publishToSonatype closeAndReleaseSonatypeStagingRepository uploads, closes and releases the deployment.
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+            username = project.findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+            password = project.findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+        }
+    }
+
+    // Timeout for slow operations
+    connectTimeout.set(java.time.Duration.ofMinutes(3))
+    clientTimeout.set(java.time.Duration.ofMinutes(3))
+
+    // Automatic transition after close
+    transitionCheckOptions {
+        maxRetries.set(60)
+        delayBetween.set(java.time.Duration.ofSeconds(10))
+    }
+}
 
 // Task to verify the configuration
 tasks.register('verifyPublishConfig') {
