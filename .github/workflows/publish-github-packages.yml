@@ -1,11 +1,9 @@
 name: Publish to GitHub Packages
 
 on:
+  # Only on release creation: a tag push would trigger a second, conflicting publish (HTTP 409)
   release:
     types: [created]
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       version:

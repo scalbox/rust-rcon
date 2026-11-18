@@ -52,14 +52,14 @@ LATEST Version
 <dependency>
     <groupId>com.scalbox</groupId>
     <artifactId>rust-rcon</artifactId>
-    <version>2.0.0-alpha.6</version>
+    <version>2.0.0-alpha.7</version>
 </dependency>
 ```
 
 2. Gradle:
 
 ```groovy
-implementation("com.scalbox:rust-rcon:2.0.0-alpha.6")
+implementation("com.scalbox:rust-rcon:2.0.0-alpha.7")
 ```
 
 3. Now you can use Rust RCON in your Java project!
