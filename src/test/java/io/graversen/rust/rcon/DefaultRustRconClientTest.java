@@ -139,9 +139,9 @@ class DefaultRustRconClientTest {
     @Test
     void rejectsNonPositiveRequestTimeout() {
         final var bus = new EventBus();
-        final var webSocketClient = new RustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus);
-
-        assertThrows(IllegalArgumentException.class, () -> new DefaultRustRconClient(webSocketClient, bus, Duration.ZERO));
+        try (var webSocketClient = new RustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus)) {
+            assertThrows(IllegalArgumentException.class, () -> new DefaultRustRconClient(webSocketClient, bus, Duration.ZERO));
+        }
     }
 
     private EventBus connectedClient(Duration requestTimeout) throws InterruptedException {

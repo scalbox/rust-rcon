@@ -26,51 +26,49 @@ class RustWebSocketClientTest {
 
     @Test
     void plainPasswordIsUsedAsTheRequestPath() {
-        final var client = new RustWebSocketClient("127.0.0.1", 28016, "secret", new EventBus());
-
-        assertEquals("/secret", client.getURI().getRawPath());
+        try (var client = new RustWebSocketClient("127.0.0.1", 28016, "secret", new EventBus())) {
+            assertEquals("/secret", client.getURI().getRawPath());
+        }
     }
 
     @Test
     void specialCharactersInThePasswordArePercentEncoded() {
-        final var client = new RustWebSocketClient("127.0.0.1", 28016, SPECIAL_PASSWORD, new EventBus());
-        final var uri = client.getURI();
+        try (var client = new RustWebSocketClient("127.0.0.1", 28016, SPECIAL_PASSWORD, new EventBus())) {
+            final var uri = client.getURI();
 
-        assertEquals("/p%23ss%20w%2Frd%25%3F%C3%A9", uri.getRawPath());
-        assertEquals("127.0.0.1", uri.getHost());
-        assertEquals(28016, uri.getPort());
-        assertTrue(uri.getRawQuery() == null && uri.getRawFragment() == null, uri.toString());
+            assertEquals("/p%23ss%20w%2Frd%25%3F%C3%A9", uri.getRawPath());
+            assertEquals("127.0.0.1", uri.getHost());
+            assertEquals(28016, uri.getPort());
+            assertTrue(uri.getRawQuery() == null && uri.getRawFragment() == null, uri.toString());
+        }
     }
 
     @Test
     void charactersAllowedInAPathAreKeptAsTheyAre() {
         final var password = "Ab9-._~!$&'()*+,;=:@";
-        final var client = new RustWebSocketClient("127.0.0.1", 28016, password, new EventBus());
-
-        assertEquals("/" + password, client.getURI().getRawPath());
+        try (var client = new RustWebSocketClient("127.0.0.1", 28016, password, new EventBus())) {
+            assertEquals("/" + password, client.getURI().getRawPath());
+        }
     }
 
     @Test
     void redactedUriNeverContainsThePassword() {
-        final var client = new RustWebSocketClient("127.0.0.1", 28016, SPECIAL_PASSWORD, new EventBus());
-
-        assertEquals("ws://127.0.0.1:28016/*", client.getServerUri());
-        assertFalse(client.toString().contains("p%23ss"), client.toString());
+        try (var client = new RustWebSocketClient("127.0.0.1", 28016, SPECIAL_PASSWORD, new EventBus())) {
+            assertEquals("ws://127.0.0.1:28016/*", client.getServerUri());
+            assertFalse(client.toString().contains("p%23ss"), client.toString());
+        }
     }
 
     @Test
     void serverReceivesTheWholeEncodedPassword() throws Exception {
-        try (var server = FakeRconServer.startNew()) {
-            final var client = new RustWebSocketClient("127.0.0.1", server.getPort(), SPECIAL_PASSWORD, new EventBus());
-            try {
-                assertTrue(client.connectBlocking(5, TimeUnit.SECONDS), "connection not opened");
+        try (var server = FakeRconServer.startNew();
+             var client = new RustWebSocketClient("127.0.0.1", server.getPort(), SPECIAL_PASSWORD, new EventBus())) {
+            assertTrue(client.connectBlocking(5, TimeUnit.SECONDS), "connection not opened");
 
-                final var requestPath = server.lastResourceDescriptor();
-                assertNotNull(requestPath);
-                assertEquals("/" + SPECIAL_PASSWORD, URLDecoder.decode(requestPath.replace("+", "%2B"), StandardCharsets.UTF_8));
-            } finally {
-                client.shutdown(Duration.ofSeconds(5));
-            }
+            final var requestPath = server.lastResourceDescriptor();
+            assertNotNull(requestPath);
+            assertEquals("/" + SPECIAL_PASSWORD, URLDecoder.decode(requestPath.replace("+", "%2B"), StandardCharsets.UTF_8));
+            client.shutdown(Duration.ofSeconds(5));
         }
     }
 }

@@ -26,21 +26,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ReconnectingRustWebSocketClientTest {
     @Test
     void reconnectDelayGrowsExponentiallyWithinBounds() {
-        final var client = new ReconnectingRustWebSocketClient("127.0.0.1", 1, "secret", new EventBus());
-        final long min = client.minReconnectDelay().toMillis();
-        final long max = client.maxReconnectDelay().toMillis();
+        try (var client = new ReconnectingRustWebSocketClient("127.0.0.1", 1, "secret", new EventBus())) {
+            final long min = client.minReconnectDelay().toMillis();
+            final long max = client.maxReconnectDelay().toMillis();
 
-        for (int i = 0; i < 100; i++) {
-            assertEquals(min, client.reconnectDelay(0).toMillis());
+            for (int i = 0; i < 100; i++) {
+                assertEquals(min, client.reconnectDelay(0).toMillis());
 
-            final long second = client.reconnectDelay(1).toMillis();
-            assertTrue(second >= min && second <= 2 * min, "attempt 1: " + second);
+                final long second = client.reconnectDelay(1).toMillis();
+                assertTrue(second >= min && second <= 2 * min, "attempt 1: " + second);
 
-            final long fourth = client.reconnectDelay(3).toMillis();
-            assertTrue(fourth >= 4 * min && fourth <= 8 * min, "attempt 3: " + fourth);
+                final long fourth = client.reconnectDelay(3).toMillis();
+                assertTrue(fourth >= 4 * min && fourth <= 8 * min, "attempt 3: " + fourth);
 
-            final long capped = client.reconnectDelay(1000).toMillis();
-            assertTrue(capped >= max / 2 && capped <= max, "attempt 1000: " + capped);
+                final long capped = client.reconnectDelay(1000).toMillis();
+                assertTrue(capped >= max / 2 && capped <= max, "attempt 1000: " + capped);
+            }
         }
     }
 
@@ -50,8 +51,7 @@ class ReconnectingRustWebSocketClientTest {
             final var bus = new EventBus();
             final var opened = new Semaphore(0);
             bus.register(new OpenedListener(opened));
-            final var client = new ReconnectingRustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus);
-            try {
+            try (var client = new ReconnectingRustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus)) {
                 client.connect();
                 assertTrue(opened.tryAcquire(5, TimeUnit.SECONDS), "first connection not opened");
 
@@ -59,7 +59,6 @@ class ReconnectingRustWebSocketClientTest {
 
                 assertTrue(opened.tryAcquire(10, TimeUnit.SECONDS), "connection not reopened");
                 assertEquals(2, server.openedConnections());
-            } finally {
                 client.shutdown(Duration.ofSeconds(5));
             }
         }
@@ -71,16 +70,17 @@ class ReconnectingRustWebSocketClientTest {
             final var bus = new EventBus();
             final var opened = new Semaphore(0);
             bus.register(new OpenedListener(opened));
-            final var client = new ReconnectingRustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus);
-            client.connect();
-            assertTrue(opened.tryAcquire(5, TimeUnit.SECONDS), "connection not opened");
+            try (var client = new ReconnectingRustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus)) {
+                client.connect();
+                assertTrue(opened.tryAcquire(5, TimeUnit.SECONDS), "connection not opened");
 
-            assertTimeoutPreemptively(Duration.ofSeconds(6), () -> client.shutdown(Duration.ofSeconds(5)));
-            server.dropConnections();
+                assertTimeoutPreemptively(Duration.ofSeconds(6), () -> client.shutdown(Duration.ofSeconds(5)));
+                server.dropConnections();
 
-            Thread.sleep(2500);
-            assertEquals(1, server.openedConnections());
-            assertTrue(client.isShutdown());
+                Thread.sleep(2500);
+                assertEquals(1, server.openedConnections());
+                assertTrue(client.isShutdown());
+            }
         }
     }
 
@@ -89,13 +89,13 @@ class ReconnectingRustWebSocketClientTest {
         final var bus = new EventBus();
         final var closedEvents = new AtomicInteger();
         bus.register(new ClosedCounter(closedEvents));
-        final var client = new ReconnectingRustWebSocketClient("127.0.0.1", FakeRconServer.freePort(), "secret", bus);
+        try (var client = new ReconnectingRustWebSocketClient("127.0.0.1", FakeRconServer.freePort(), "secret", bus)) {
+            client.connect();
+            assertTimeoutPreemptively(Duration.ofSeconds(1), () -> client.shutdown(Duration.ofSeconds(5)));
 
-        client.connect();
-        assertTimeoutPreemptively(Duration.ofSeconds(1), () -> client.shutdown(Duration.ofSeconds(5)));
-
-        Thread.sleep(4000);
-        assertTrue(closedEvents.get() <= 1, "close events: " + closedEvents.get());
+            Thread.sleep(4000);
+            assertTrue(closedEvents.get() <= 1, "close events: " + closedEvents.get());
+        }
     }
 
     public static final class OpenedListener {
