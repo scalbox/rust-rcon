@@ -381,12 +381,32 @@ public class UmodBridgeRustEventService extends BaseEventHandler implements Rust
             return Optional.empty();
         }
 
+        final var amount = parseDecimal(payload.get("amount"));
+        if (amount.isEmpty()) {
+            emitDiagnostic(UmodBridgeDiagnosticType.INVALID_PAYLOAD, rawMessage, "player.violation amount is not a number");
+            return Optional.empty();
+        }
+
         return Optional.of(new PlayerViolationEvent(
                 steamId.get(),
                 PlayerName.ofNullable(payload.get("playerName").asText()),
                 payload.get("violationType").asText(),
-                new BigDecimal(payload.get("amount").asText())
+                amount.get()
         ));
+    }
+
+    /**
+     * Converts a JSON value, either a number or a numeric string, into a {@link BigDecimal}.
+     *
+     * @param value the JSON value
+     * @return the number, or empty if the value is not numeric
+     */
+    private Optional<BigDecimal> parseDecimal(@NonNull JsonNode value) {
+        try {
+            return Optional.of(new BigDecimal(value.asText().strip()));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     private Optional<PlayerBannedEvent> parsePlayerBan(@NonNull String rawMessage, JsonNode payload) {

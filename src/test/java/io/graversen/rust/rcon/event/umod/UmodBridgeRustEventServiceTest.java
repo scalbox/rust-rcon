@@ -373,6 +373,37 @@ class UmodBridgeRustEventServiceTest {
     }
 
     @Test
+    void emitsDiagnosticWhenViolationAmountIsNotNumeric() {
+        final var eventBus = new EventBus();
+        final var eventService = new UmodBridgeRustEventService(eventBus);
+        final var violationSubscriber = new ViolationSubscriber();
+        final var diagnosticSubscriber = new DiagnosticSubscriber();
+        eventBus.register(violationSubscriber);
+        eventBus.register(diagnosticSubscriber);
+        eventService.configure();
+
+        eventBus.post(rconReceived("[RustRconBridge] {\"schemaVersion\":1,\"eventType\":\"player.violation\",\"eventId\":\"evt-15b\",\"timestamp\":\"2026-05-27T12:00:00Z\",\"payload\":{\"steamId\":\"76561197979952036\",\"playerName\":\"Doctor Delete\",\"violationType\":\"FlyHack\",\"amount\":\"lots\"}}"));
+
+        assertTrue(violationSubscriber.events.isEmpty());
+        assertEquals(1, diagnosticSubscriber.events.size());
+        assertEquals(UmodBridgeDiagnosticType.INVALID_PAYLOAD, diagnosticSubscriber.events.get(0).getDiagnosticType());
+    }
+
+    @Test
+    void acceptsNumericStringViolationAmount() {
+        final var eventBus = new EventBus();
+        final var eventService = new UmodBridgeRustEventService(eventBus);
+        final var subscriber = new ViolationSubscriber();
+        eventBus.register(subscriber);
+        eventService.configure();
+
+        eventBus.post(rconReceived("[RustRconBridge] {\"schemaVersion\":1,\"eventType\":\"player.violation\",\"eventId\":\"evt-15c\",\"timestamp\":\"2026-05-27T12:00:00Z\",\"payload\":{\"steamId\":\"76561197979952036\",\"playerName\":\"Doctor Delete\",\"violationType\":\"FlyHack\",\"amount\":\" 7.25 \"}}"));
+
+        assertEquals(1, subscriber.events.size());
+        assertEquals(new BigDecimal("7.25"), subscriber.events.get(0).getAmount());
+    }
+
+    @Test
     void emitsTeamEventFromBridgeEnvelope() {
         final var eventBus = new EventBus();
         final var eventService = new UmodBridgeRustEventService(eventBus);

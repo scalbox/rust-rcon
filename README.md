@@ -77,7 +77,7 @@ implementation("com.scalbox:rust-rcon:2.0.0-beta.1")
 
 ### Upgrade notes
 
-Changes that may affect existing code when upgrading to the next release:
+Changes that may affect existing code when upgrading from `2.0.0-beta.1`:
 
 - **Java version**: the library now requires Java 25 or later (previously Java 17).
 - **Logging backend**: the library depends only on `slf4j-api` and no longer brings `logback-classic`.
@@ -96,6 +96,11 @@ Changes that may affect existing code when upgrading to the next release:
 - **Reconnection**: `ReconnectingRustWebSocketClient` waits from 1 second up to 60 seconds between attempts.
   `reconnectDelay()` has been replaced by `reconnectDelay(int attempt)`, `minReconnectDelay()` and
   `maxReconnectDelay()`.
+- **RCON password in the URI**: characters that are not allowed in a URI path, such as `#`, `?`, `/`, `%`,
+  spaces or non-ASCII characters, are now percent-encoded; passwords made of other characters are sent unchanged.
+- **Stricter event parsing**: chat messages can no longer produce other events. `PlayerDisconnectedEvent` and
+  `PlayerMiniCopterCrashedEvent` are emitted only for the exact server line, and uMod bridge envelopes are
+  accepted only when the bridge prefix starts the message.
 
 ## Events :rocket:
 
