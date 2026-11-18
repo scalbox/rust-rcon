@@ -128,3 +128,6 @@ buildNumber.properties
 .gradle/
 build/
 /gradle.properties
+
+# IntelliJ Fast Request plugin (local, per-user configuration)
+.fastRequest/
