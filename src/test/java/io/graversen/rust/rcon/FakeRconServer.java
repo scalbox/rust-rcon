@@ -27,6 +27,15 @@ import java.util.function.Function;
 /**
  * Minimal in-process RCON endpoint for tests: answers every request with the message returned by the configured
  * responder.
+ * <p>
+ * Shared test fixture: it is public and uses only the public API, so tests in any package, including
+ * {@code com.scalbox.rust.rcon}, can use it through an import instead of writing their own fake server.
+ * <pre>{@code
+ * try (var server = FakeRconServer.startNew()) {
+ *     var configuration = new RustRconConfiguration("127.0.0.1", server.getPort(), "secret");
+ *     // connect a client or a service to the server
+ * }
+ * }</pre>
  */
 public final class FakeRconServer extends WebSocketServer implements AutoCloseable {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
