@@ -23,7 +23,6 @@ import io.graversen.rust.rcon.util.CommonUtils;
 import io.graversen.rust.rcon.util.EventEmitter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.StringSubstitutor;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
@@ -82,7 +81,7 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
     public RustWebSocketClient(@NonNull URI serverUri, @NonNull EventBus eventBus) {
         super(serverUri);
         this.eventBus = eventBus;
-        this.serverUriRedacted = StringSubstitutor.replace(
+        this.serverUriRedacted = CommonUtils.substitute(
                 SERVER_URI_TEMPLATE_REDACTED,
                 Map.of(
                         "hostname", serverUri.getHost(),
@@ -254,7 +253,7 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
      */
     protected void log(@NonNull Consumer<String> logger, @NonNull String message, Object... args) {
         message = String.format(message, args);
-        message = StringSubstitutor.replace(
+        message = CommonUtils.substitute(
                 LOG_TEMPLATE,
                 Map.of(
                         "serverUri", serverUriRedacted,
@@ -298,7 +297,7 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
             @NonNull Integer port,
             @NonNull String password
     ) {
-        final var compiledServerUri = StringSubstitutor.replace(
+        final var compiledServerUri = CommonUtils.substitute(
                 SERVER_URI_TEMPLATE,
                 Map.of(
                         "hostname", hostname,

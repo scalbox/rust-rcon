@@ -18,9 +18,9 @@ import io.graversen.rust.rcon.RustRconResponse;
 import io.graversen.rust.rcon.RustRconRouter;
 import io.graversen.rust.rcon.protocol.oxide.DefaultOxideCodec;
 import io.graversen.rust.rcon.protocol.oxide.OxideCodec;
+import io.graversen.rust.rcon.util.CommonUtils;
 import io.graversen.rust.rcon.util.Lazy;
 import lombok.NonNull;
-import org.apache.commons.text.StringSubstitutor;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -81,7 +81,7 @@ public class DefaultRustCodec implements Codec {
     }
 
     protected RustRconMessage compile(@NonNull String template, @NonNull Map<String, String> values) {
-        final var compiledTemplate = StringSubstitutor.replace(template, values);
+        final var compiledTemplate = CommonUtils.substitute(template, values);
         return new SimpleRustRconMessage(compiledTemplate);
     }
 }

@@ -14,11 +14,11 @@
 
 package io.graversen.rust.rcon.protocol.util;
 
+import io.graversen.rust.rcon.util.CommonUtils;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import org.apache.commons.text.StringSubstitutor;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -38,7 +38,7 @@ public class RconPayload implements Supplier<String> {
     }
 
     static RconPayload build(@NonNull String payloadTemplate, Map<String, Object> args) {
-        final var payload = StringSubstitutor.replace(payloadTemplate, args);
+        final var payload = CommonUtils.substitute(payloadTemplate, args);
         return new RconPayload(payload);
     }
 

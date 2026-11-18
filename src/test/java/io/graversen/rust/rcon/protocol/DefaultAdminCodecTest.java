@@ -72,6 +72,17 @@ class DefaultAdminCodecTest {
     }
 
     @Test
+    void banPlayerKeepsPlaceholdersInNamesAsText() {
+        final var steamId = SteamId64.parseOrFail("76561197979952036");
+        defaultAdminCodec.banPlayer(steamId, new PlayerName("${reason}"), "cheating");
+        defaultAdminCodec.banPlayer(steamId, new PlayerName("${playerName}"), "cheating");
+
+        verify(rustRconRouter, times(2)).send(rconMessageCaptor.capture());
+        assertEquals("global.banid \"76561197979952036\" \"${reason}\" \"cheating\"", rconMessageCaptor.getAllValues().get(0).get());
+        assertEquals("global.banid \"76561197979952036\" \"${playerName}\" \"cheating\"", rconMessageCaptor.getAllValues().get(1).get());
+    }
+
+    @Test
     void kickPlayerEscapesQuotesInReason() {
         final var steamId = SteamId64.parseOrFail("76561197979952036");
         defaultAdminCodec.kickPlayer(steamId, "bye\" \"76561197979952037");

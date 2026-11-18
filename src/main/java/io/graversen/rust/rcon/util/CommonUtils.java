@@ -17,11 +17,13 @@ package io.graversen.rust.rcon.util;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.text.StringSubstitutor;
 
 import java.net.URI;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @UtilityClass
@@ -62,6 +64,21 @@ public class CommonUtils {
 
     public static int processors() {
         return Runtime.getRuntime().availableProcessors();
+    }
+
+    /**
+     * Replaces the {@code ${name}} variables of a template with the given values. The values are inserted as they
+     * are: a value that itself contains {@code ${...}} is not resolved again, so it can neither change other parts
+     * of the result nor cause an endless substitution.
+     *
+     * @param template template with {@code ${name}} variables
+     * @param values   values of the variables, by name
+     * @return the template with the variables replaced; unknown variables are left unchanged
+     */
+    public static String substitute(@NonNull String template, @NonNull Map<String, ?> values) {
+        return new StringSubstitutor(values)
+                .setDisableSubstitutionInValues(true)
+                .replace(template);
     }
 
     public static boolean isNullOrEmpty(String string) {
