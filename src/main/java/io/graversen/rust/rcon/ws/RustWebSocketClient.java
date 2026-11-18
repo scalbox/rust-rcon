@@ -29,6 +29,7 @@ import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
@@ -139,13 +140,18 @@ public class RustWebSocketClient extends WebSocketClient implements Closeable, E
     }
 
     /**
-     * Logs the error and posts a {@link WsErrorEvent}.
+     * Logs the error and posts a {@link WsErrorEvent}. I/O errors, such as an unreachable server, are logged as a
+     * single warning line; any other error is logged with its stack trace.
      *
      * @param ex the error raised by the WebSocket
      */
     @Override
     public void onError(Exception ex) {
-        log.error(ex.getMessage(), ex);
+        if (ex instanceof IOException) {
+            log(log::warn, "%s: %s", ex.getClass().getSimpleName(), ex.getMessage());
+        } else {
+            log.error(ex.getMessage(), ex);
+        }
         eventBus.post(new WsErrorEvent(serverUriRedacted, ex));
     }
 

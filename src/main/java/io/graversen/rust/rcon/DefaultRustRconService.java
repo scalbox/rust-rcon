@@ -303,7 +303,7 @@ public class DefaultRustRconService implements RustRconService {
     /**
      * Schedules the internal tasks that refresh the server information (every 5 seconds), the players (every
      * 3 seconds) and the teams (every 5 minutes), and registers the listeners that keep the corresponding snapshots.
-     * Called by {@link #start()}.
+     * The internal tasks do nothing while the connection is not open. Called by {@link #start()}.
      */
     protected void configure() {
         final var serverInfoEmitTask = new ServerInfoEmitTask(
@@ -546,7 +546,7 @@ public class DefaultRustRconService implements RustRconService {
     }
 
     /**
-     * Schedules an internal task.
+     * Schedules an internal task that runs only while the connection is open.
      *
      * @param task         the task to run
      * @param fixedDelay   delay between two consecutive runs
@@ -555,7 +555,7 @@ public class DefaultRustRconService implements RustRconService {
     private void registerInternalTask(@NonNull RconTask task, @NonNull Duration fixedDelay, @Nullable Duration initialDelay) {
         log.info("Registering task: {} (Every {} seconds)", task.getClass().getSimpleName(), fixedDelay.getSeconds());
         initialDelay = Objects.requireNonNullElse(initialDelay, defaultTaskInitialDelay());
-        schedule(task, fixedDelay, initialDelay);
+        schedule(new ConnectedOnlyRconTask(task, rustWebSocketClient.get()), fixedDelay, initialDelay);
     }
 
     /**
@@ -588,5 +588,44 @@ public class DefaultRustRconService implements RustRconService {
     private void runConfigure() {
         log.info("Running internal configuration hook");
         configure();
+    }
+
+    /**
+     * Task that runs its delegate only while the WebSocket connection is open.
+     */
+    private static final class ConnectedOnlyRconTask extends RconTask {
+        private final RconTask delegate;
+        private final RustWebSocketClient webSocketClient;
+
+        /**
+         * Creates the task.
+         *
+         * @param delegate        the task to run
+         * @param webSocketClient the connection whose state is checked before every run
+         */
+        private ConnectedOnlyRconTask(@NonNull RconTask delegate, @NonNull RustWebSocketClient webSocketClient) {
+            this.delegate = delegate;
+            this.webSocketClient = webSocketClient;
+        }
+
+        /**
+         * Returns the name of the delegate task.
+         *
+         * @return the delegate class name
+         */
+        @Override
+        protected String name() {
+            return delegate.getClass().getSimpleName();
+        }
+
+        /**
+         * Runs the delegate if the connection is open, otherwise does nothing.
+         */
+        @Override
+        protected void execute() {
+            if (webSocketClient.isOpen()) {
+                delegate.run();
+            }
+        }
     }
 }

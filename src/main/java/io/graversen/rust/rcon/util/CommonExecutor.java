@@ -24,12 +24,22 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Holder of the scheduled executor shared by all the clients in the JVM, used for reconnection attempts and for
+ * the callbacks of completed RCON requests.
+ */
 @Slf4j
 @UtilityClass
 public class CommonExecutor {
     private static final String GROUP_NAME = "rust";
     private static ScheduledExecutorService instance;
 
+    /**
+     * Returns the shared executor, creating it on first use. The executor has one daemon thread per available
+     * processor, named {@code rust-worker-N}, so it never keeps the JVM alive on its own.
+     *
+     * @return the shared scheduled executor
+     */
     @Synchronized
     public static ScheduledExecutorService getInstance() {
         if (instance == null) {
@@ -41,10 +51,26 @@ public class CommonExecutor {
         return instance;
     }
 
+    /**
+     * Creates a factory of named daemon threads.
+     *
+     * @param indexer counter used to number the threads
+     * @return the thread factory
+     */
     private static ThreadFactory namedThreadFactory(@NonNull AtomicInteger indexer) {
-        return runnable -> new Thread(runnable, getName(indexer));
+        return runnable -> {
+            final var thread = new Thread(runnable, getName(indexer));
+            thread.setDaemon(true);
+            return thread;
+        };
     }
 
+    /**
+     * Returns the name of the next worker thread.
+     *
+     * @param indexer counter used to number the threads
+     * @return a name in the form {@code rust-worker-N}
+     */
     private static String getName(@NonNull AtomicInteger indexer) {
         return String.format("%s-worker-%d", GROUP_NAME, indexer.getAndIncrement());
     }
