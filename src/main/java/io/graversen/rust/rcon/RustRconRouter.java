@@ -20,12 +20,35 @@ import lombok.NonNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+/**
+ * Sends RCON messages to a Rust server, assigning each one a request identifier.
+ */
 public interface RustRconRouter {
+    /**
+     * Sends a message and maps the response.
+     *
+     * @param rustRconMessage the message to send
+     * @param mapper          function applied to the response
+     * @param <T>             type of the mapped response
+     * @return a future completed with the mapped response, or exceptionally if the exchange fails
+     */
     <T> CompletableFuture<T> send(@NonNull RustRconMessage rustRconMessage, @NonNull Function<RustRconResponse, T> mapper);
 
+    /**
+     * Sends a message.
+     *
+     * @param rustRconMessage the message to send
+     * @return a future completed with the response, or exceptionally if the exchange fails
+     */
     CompletableFuture<RustRconResponse> send(@NonNull RustRconMessage rustRconMessage);
 
+    /**
+     * Starts connecting to the server, without waiting for the connection to be established.
+     */
     void start();
 
+    /**
+     * Closes the connection to the server.
+     */
     void stop();
 }
