@@ -77,7 +77,19 @@ implementation("com.scalbox:rust-rcon:2.0.0-beta.2")
 
 ### Upgrade notes
 
-Changes that may affect existing code when upgrading from `2.0.0-beta.1`:
+#### Upgrading from `2.0.0-beta.3`
+
+- **Connection-lost detection**: it is now enabled by default. While connected, the client sends a ping every
+  60 seconds; if no pong arrives within about 90 seconds, the connection is closed and `ReconnectingRustWebSocketClient`
+  connects again. Override `RustWebSocketClient.connectionLostTimeout()` to change the interval, or return
+  `Duration.ZERO` to disable it.
+- **Reconnection after a normal server close**: `ReconnectingRustWebSocketClient` now also reconnects when the server
+  closes the connection with the normal close code 1000; a close requested by the client still does not reconnect.
+  `WsClosedEvent.isRemote()` tells who closed the connection.
+
+#### Upgrading from `2.0.0-beta.1`
+
+The changes above, plus:
 
 - **Java version**: the library now requires Java 25 or later (previously Java 17).
 - **Logging backend**: the library depends only on `slf4j-api` and no longer brings `logback-classic`.
