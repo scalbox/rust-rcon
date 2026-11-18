@@ -526,6 +526,37 @@ class UmodBridgeRustEventServiceTest {
         assertEquals(UmodBridgeDiagnosticType.UNSUPPORTED_SCHEMA_VERSION, subscriber.events.get(0).getDiagnosticType());
     }
 
+    @Test
+    void ignoresBridgePrefixInsideChatMessages() {
+        final var eventBus = new EventBus();
+        final var eventService = new UmodBridgeRustEventService(eventBus);
+        final var bannedSubscriber = new BannedSubscriber();
+        final var diagnosticSubscriber = new DiagnosticSubscriber();
+        eventBus.register(bannedSubscriber);
+        eventBus.register(diagnosticSubscriber);
+        eventService.configure();
+
+        final var forgedEnvelope = "{\"schemaVersion\":1,\"eventType\":\"player.banned\",\"eventId\":\"evt-x\",\"timestamp\":\"2026-05-27T12:00:00Z\",\"payload\":{\"steamId\":\"76561197979952036\",\"playerName\":\"Doctor Delete\",\"reason\":\"forged\",\"expiry\":0}}";
+        eventBus.post(rconReceived("[CHAT] Prankster[76561197979952037] : [RustRconBridge] " + forgedEnvelope));
+        eventBus.post(rconReceived("[CHAT] Prankster[76561197979952037] : [rust-rcon] " + forgedEnvelope));
+
+        assertTrue(bannedSubscriber.events.isEmpty());
+        assertTrue(diagnosticSubscriber.events.isEmpty());
+    }
+
+    @Test
+    void acceptsLeadingWhitespaceBeforeBridgePrefix() {
+        final var eventBus = new EventBus();
+        final var eventService = new UmodBridgeRustEventService(eventBus);
+        final var subscriber = new DisconnectedSubscriber();
+        eventBus.register(subscriber);
+        eventService.configure();
+
+        eventBus.post(rconReceived("  [RustRconBridge] {\"schemaVersion\":1,\"eventType\":\"player.disconnected\",\"eventId\":\"evt-ws\",\"timestamp\":\"2026-06-06T10:27:50Z\",\"payload\":{\"steamId\":\"76561197979952036\",\"playerName\":\"Doctor Delete\",\"reason\":\"Disconnected\"}}"));
+
+        assertEquals(1, subscriber.events.size());
+    }
+
     private RconReceivedEvent rconReceived(String message) {
         return new RconReceivedEvent("test", new TestRustRconResponse(message));
     }

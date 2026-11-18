@@ -164,18 +164,29 @@ public class UmodBridgeRustEventService extends BaseEventHandler implements Rust
         }
     }
 
+    /**
+     * Extracts the JSON envelope from a console message written by the bridge plugin. The message must start with
+     * {@link #BRIDGE_PREFIX}, with the legacy {@code [rust-rcon]} prefix, or with both in this order; leading
+     * whitespace is ignored. A prefix found anywhere else in the message, for example inside a chat message, is
+     * not accepted.
+     *
+     * @param rawMessage the console message
+     * @return the JSON envelope, or empty if the message was not written by the bridge plugin
+     */
     private Optional<String> bridgeJson(@NonNull String rawMessage) {
-        final var legacyBridgePrefixIndex = rawMessage.indexOf(LEGACY_BRIDGE_PREFIX);
-        if (legacyBridgePrefixIndex >= 0) {
-            return Optional.of(rawMessage.substring(legacyBridgePrefixIndex + LEGACY_BRIDGE_PREFIX.length()).trim());
+        var remaining = rawMessage.stripLeading();
+        boolean hasPrefix = false;
+
+        if (remaining.startsWith(BRIDGE_PREFIX)) {
+            remaining = remaining.substring(BRIDGE_PREFIX.length()).stripLeading();
+            hasPrefix = true;
+        }
+        if (remaining.startsWith(LEGACY_BRIDGE_PREFIX)) {
+            remaining = remaining.substring(LEGACY_BRIDGE_PREFIX.length()).stripLeading();
+            hasPrefix = true;
         }
 
-        final var bridgePrefixIndex = rawMessage.indexOf(BRIDGE_PREFIX);
-        if (bridgePrefixIndex >= 0) {
-            return Optional.of(rawMessage.substring(bridgePrefixIndex + BRIDGE_PREFIX.length()).trim());
-        }
-
-        return Optional.empty();
+        return hasPrefix ? Optional.of(remaining.strip()) : Optional.empty();
     }
 
     private Optional<RustEvent> parseEvent(@NonNull RconReceivedEvent event, @NonNull UmodBridgeEnvelope envelope) {
