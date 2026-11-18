@@ -40,7 +40,7 @@ public class PlayerMiniCopterCrashedEventParser extends BaseRustEventParser<Play
      */
     @Override
     public boolean supports(@NonNull RustRconResponse payload) {
-        return !PlayerChatEventParser.isChat(payload) && DETAILS_PATTERN.matcher(payload.getMessage()).find();
+        return PlayerChatEventParser.isServerMessage(payload) && DETAILS_PATTERN.matcher(payload.getMessage()).find();
     }
 
     @Override

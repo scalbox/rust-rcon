@@ -15,6 +15,7 @@
 package io.graversen.rust.rcon.event.player;
 
 import io.graversen.rust.rcon.TestRustRconResponse;
+import io.graversen.rust.rcon.protocol.util.SteamId64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -31,7 +32,7 @@ class PlayerMiniCopterCrashedEventParserTest {
     void parseEvent_verification(String payload, String steamId, String playerName) {
         final var event = playerMiniCopterCrashedEventParser.parseEvent(new TestRustRconResponse(payload));
         assertTrue(event.isPresent());
-        assertEquals(steamId, event.get().getSteamId().get());
+        assertEquals(SteamId64.parseOrFail(steamId), event.get().getSteamId());
         assertEquals(playerName, event.get().getPlayerName().get());
     }
 

@@ -8,6 +8,7 @@
 package io.graversen.rust.rcon.event.player;
 
 import io.graversen.rust.rcon.TestRustRconResponse;
+import io.graversen.rust.rcon.protocol.util.SteamId64;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +27,7 @@ class PlayerDisconnectedEventParserTest {
         assertTrue(parser.supports(payload));
         final var event = parser.parseEvent(payload);
         assertTrue(event.isPresent());
-        assertEquals("76561197979952036", event.get().getSteamId().get());
+        assertEquals(SteamId64.parseOrFail("76561197979952036"), event.get().getSteamId());
         assertEquals("Disconnected", event.get().getReason());
     }
 

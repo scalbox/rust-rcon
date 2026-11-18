@@ -55,15 +55,16 @@ public class PlayerChatEventParser extends BaseRustEventParser<PlayerChatEvent> 
     }
 
     /**
-     * Tells whether an RCON message carries text written by a player in chat: either a console chat line (see
-     * {@link #hasChatPrefix(String)}) or a message of type {@value #CHAT_MESSAGE_TYPE}. Parsers of other events use
-     * it to ignore text that a player could craft to look like a server line.
+     * Tells whether an RCON message was written by the server itself rather than by a player in chat. A message
+     * comes from chat when it is a console chat line (see {@link #hasChatPrefix(String)}) or a message of type
+     * {@value #CHAT_MESSAGE_TYPE}. Parsers of other events use it to ignore text that a player could craft to look
+     * like a server line.
      *
      * @param payload the RCON message
-     * @return {@code true} if the message comes from chat
+     * @return {@code true} if the message does not come from chat
      */
-    public static boolean isChat(@NonNull RustRconResponse payload) {
-        return CHAT_MESSAGE_TYPE.equalsIgnoreCase(payload.getType()) || hasChatPrefix(payload.getMessage());
+    public static boolean isServerMessage(@NonNull RustRconResponse payload) {
+        return !CHAT_MESSAGE_TYPE.equalsIgnoreCase(payload.getType()) && !hasChatPrefix(payload.getMessage());
     }
 
     @Override

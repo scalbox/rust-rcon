@@ -59,7 +59,7 @@ public class PlayerDisconnectedEventParser extends BaseRustEventParser<PlayerDis
      */
     @Override
     public boolean supports(@NonNull RustRconResponse payload) {
-        return !PlayerChatEventParser.isChat(payload) && DISCONNECTED_PATTERN.matcher(payload.getMessage()).find();
+        return PlayerChatEventParser.isServerMessage(payload) && DISCONNECTED_PATTERN.matcher(payload.getMessage()).find();
     }
 
     @Override
