@@ -73,6 +73,27 @@ implementation("com.scalbox:rust-rcon:2.0.0-beta.1")
 > **Note:** versions up to `2.0.0-alpha.5` shipped the core classes under `com.scalbox.rust.rcon`.
 > Starting from `2.0.0-alpha.6` they live in `io.graversen.rust.rcon`: update your imports accordingly.
 
+### Upgrade notes
+
+Changes that may affect existing code when upgrading to the next release:
+
+- **Logging backend**: the library depends only on `slf4j-api` and no longer brings `logback-classic`.
+  Add an SLF4J backend to your application (Spring Boot already includes one), otherwise SLF4J prints a warning
+  and discards the log messages.
+- **Service lifecycle**: `DefaultRustRconService.start()` can be called only once. Calling it again, or after
+  `stop()`, throws `IllegalStateException`: to connect again, create a new instance. `stop()` cancels the
+  scheduled tasks, releases the scheduler created by the service and returns within a few seconds even if the
+  server was never reachable.
+- **Shared scheduler**: `new DefaultRustRconService(configuration, scheduledExecutorService)` runs the periodic
+  tasks of many services on the same threads; `stop()` cancels only the tasks of that service and leaves the
+  scheduler running.
+- **Request timeout**: every request fails with a `TimeoutException` if no response arrives within 30 seconds,
+  and pending requests fail with an `IllegalStateException` when the connection is closed. Override
+  `DefaultRustRconService.requestTimeout()`, or pass a timeout to the `DefaultRustRconClient` constructor, to change it.
+- **Reconnection**: `ReconnectingRustWebSocketClient` waits from 1 second up to 60 seconds between attempts.
+  `reconnectDelay()` has been replaced by `reconnectDelay(int attempt)`, `minReconnectDelay()` and
+  `maxReconnectDelay()`.
+
 ## Events :rocket:
 
 Rust RCON offers a plethora of events that give developers a detailed insight into various facets of the Rust game server. Below is a categorized breakdown of these events:
@@ -158,9 +179,9 @@ To use the `DefaultRustRconService` class, you must follow a standard lifecycle:
 
 1. Instantiation: Create an instance by passing a `RustRconConfiguration` object with connection details (IP, port, password).
 2. Event Registration (Optional): If you want to react to events (e.g., chat messages, server logs), register your listeners before or after startup.
-3. Startup: Call the `start()` method. This opens the WebSocket connection and starts automatic tasks (polling players, server info, etc.).
+3. Startup: Call the `start()` method, once. This opens the WebSocket connection and starts automatic tasks (polling players, server info, etc.).
 4. Interaction: Use the exposed methods to send commands or read state (e.g., `playerManagement()`, `codec()`, `players()`).
-5. Stoppage: Call `stop()` when the application terminates to close connections and threads.
+5. Stoppage: Call `stop()` when the application terminates, or when the server is removed, to close the connection and cancel the tasks. A stopped service cannot be started again: create a new instance.
 
 Here is a practical example of use:
 
@@ -282,13 +303,14 @@ The `DefaultRustRconClient` class is the concrete, low-level implementation of t
 
 Here are its main functions:
 
-1. **Asynchronous Request/Response Handling**: This component solves the complexity of asynchrony. When you send a command, the server responds at a future time. This class uses a `CompletableFuture`
-   cache to "remember" which request is pending and completes the correct future when the response with the same ID arrives (`onWsMessage`).
+1. **Asynchronous Request/Response Handling**: This component solves the complexity of asynchrony. When you send a command, the server responds at a future time. This class keeps a map of the
+   pending `CompletableFuture`s and completes the correct future when the response with the same ID arrives (`onWsMessage`). A future fails if no
+   response arrives within the request timeout (30 seconds by default) or if the connection is closed first.
 2. **Serialization/Deserialization**: Converts Java objects (`RustRconRequest`) to JSON for sending and converts the JSON received from the WebSocket into Java objects (`RustRconResponse`), using a
    `JsonMapper`.
-3. **WebSocket Event Handling**: Listens for low-level WebSocket events (`WsOpenedEvent`, `WsMessageEvent`, `WsClosedEvent`) via the `EventBus` and reacts accordingly (e.g., by setting the
-   `isInitialized` flag or publishing an `RconReceivedEvent`).
-4. **Connection Management**: Controls the opening (`connect()`) and controlled closing (`close()`) of the underlying WebSocket connection.
+3. **WebSocket Event Handling**: Listens for low-level WebSocket events (`WsOpenedEvent`, `WsMessageEvent`, `WsClosedEvent`) via the `EventBus` and reacts accordingly (e.g., by failing the pending
+   requests when the connection closes or publishing an `RconReceivedEvent`).
+4. **Connection Management**: Controls the opening (`connect()`) and controlled closing (`close()`) of the underlying WebSocket connection; `close()` waits at most 5 seconds.
 
 ### How to use it
 
@@ -305,14 +327,14 @@ Example of direct usage:
 ```java
 import com.google.common.eventbus.EventBus;
 import io.graversen.rust.rcon.DefaultRustRconClient;
-import io.graversen.rust.rcon.protocol.RustRconRequest;
-import io.graversen.rust.rcon.ws.RustWebSocketClient; // Hypothetical implementation
+import io.graversen.rust.rcon.RustRconRequest;
+import io.graversen.rust.rcon.ws.RustWebSocketClient;
 
 import java.net.URI;
 
 public class ClientUsage {
 
-    public void manualClientUsage() {
+    public void manualClientUsage() throws Exception {
         // 1. Prepare dependencies
         EventBus eventBus = new EventBus();
         RustWebSocketClient wsClient = new RustWebSocketClient(URI.create("ws://127.0.0.1:28016/password"), eventBus);
@@ -324,17 +346,7 @@ public class ClientUsage {
         client.connect();
 
         // 4. Manual request creation (note: you must manage the ID here if you don't use the Router)
-        RustRconRequest request = new RustRconRequest() {
-            @Override
-            public int getIdentifier() {
-                return 12345;
-            }
-
-            @Override
-            public String getMessage() {
-                return "status";
-            }
-        };
+        RustRconRequest request = new RustRconRequest(12345, "status");
 
         // 5. Sending and handling the response
         client.send(request).thenAccept(response -> {
