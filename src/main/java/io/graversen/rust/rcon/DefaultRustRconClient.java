@@ -246,23 +246,26 @@ public class DefaultRustRconClient implements RustRconClient {
 
     /**
      * Parses a message received from the server, completes the pending request with the same identifier, if any,
-     * and posts the message as a {@link RconReceivedEvent}. Messages whose identifier is below
-     * {@link #initialMessageIdentifier()}, such as console output, are only posted.
+     * and posts the message as a {@link RconReceivedEvent}. Messages without an identifier, or whose identifier is
+     * below {@link #initialMessageIdentifier()}, such as console output, are only posted; a missing identifier is
+     * treated as {@code -1}.
      *
      * @param messageEvent the event carrying the raw message
      */
     @Subscribe
     public void onWsMessage(@NonNull WsMessageEvent messageEvent) {
         final var rconMessage = jsonMapper().fromJson(messageEvent.getMessage(), RustRconResponseDTO.class);
-        final var pendingRequest = pendingRequests.get(rconMessage.getIdentifier());
+        final int identifier = Objects.requireNonNullElse(rconMessage.getIdentifier(), -1);
+        final boolean isResponse = identifier >= initialMessageIdentifier();
+        final var pendingRequest = isResponse ? pendingRequests.get(identifier) : null;
 
         final var mappedRconMessage = mapResponse(pendingRequest == null ? null : pendingRequest.request()).apply(rconMessage);
 
-        if (rconMessage.getIdentifier() >= initialMessageIdentifier()) {
+        if (isResponse) {
             if (pendingRequest != null) {
                 pendingRequest.response().complete(mappedRconMessage);
             } else {
-                log.warn("Could not resolve response future for ID: {} (Discarding it)", rconMessage.getIdentifier());
+                log.warn("Could not resolve response future for ID: {} (Discarding it)", identifier);
             }
         }
 

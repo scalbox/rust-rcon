@@ -9,6 +9,7 @@ package io.graversen.rust.rcon;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import io.graversen.rust.rcon.event.rcon.RconReceivedEvent;
 import io.graversen.rust.rcon.event.ws.WsOpenedEvent;
 import io.graversen.rust.rcon.ws.RustWebSocketClient;
 import org.junit.jupiter.api.AfterEach;
@@ -16,13 +17,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -91,6 +95,20 @@ class DefaultRustRconClientTest {
     }
 
     @Test
+    void messageWithoutIdentifierIsPostedAsEvent() throws Exception {
+        final var bus = connectedClient(Duration.ofSeconds(5));
+        final var receivedEvents = new LinkedBlockingQueue<RconReceivedEvent>();
+        bus.register(new ReceivedEventCollector(receivedEvents));
+
+        server.broadcast("{\"Message\":\"console output\",\"Type\":\"Generic\",\"Stacktrace\":\"\"}");
+
+        final var event = receivedEvents.poll(5, TimeUnit.SECONDS);
+        assertNotNull(event, "message not posted");
+        assertEquals(-1, event.getRconResponse().getIdentifier());
+        assertEquals("console output", event.getRconResponse().getMessage());
+    }
+
+    @Test
     void sendFailsImmediatelyWhenNotConnected() {
         final var bus = new EventBus();
         client = new DefaultRustRconClient(new RustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus), bus);
@@ -126,13 +144,14 @@ class DefaultRustRconClientTest {
         assertThrows(IllegalArgumentException.class, () -> new DefaultRustRconClient(webSocketClient, bus, Duration.ZERO));
     }
 
-    private void connectedClient(Duration requestTimeout) throws InterruptedException {
+    private EventBus connectedClient(Duration requestTimeout) throws InterruptedException {
         final var bus = new EventBus();
         final var opened = new CountDownLatch(1);
         bus.register(new OpenedListener(opened));
         client = new DefaultRustRconClient(new RustWebSocketClient("127.0.0.1", server.getPort(), "secret", bus), bus, requestTimeout);
         client.connect();
         assertTrue(opened.await(5, TimeUnit.SECONDS), "connection not opened");
+        return bus;
     }
 
     public static final class OpenedListener {
@@ -145,6 +164,19 @@ class DefaultRustRconClientTest {
         @Subscribe
         public void onOpened(WsOpenedEvent event) {
             opened.countDown();
+        }
+    }
+
+    public static final class ReceivedEventCollector {
+        private final BlockingQueue<RconReceivedEvent> events;
+
+        ReceivedEventCollector(BlockingQueue<RconReceivedEvent> events) {
+            this.events = events;
+        }
+
+        @Subscribe
+        public void onReceived(RconReceivedEvent event) {
+            events.add(event);
         }
     }
 }
