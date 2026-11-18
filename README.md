@@ -87,7 +87,7 @@ implementation("com.scalbox:rust-rcon:2.0.0-beta.2")
   closes the connection with the normal close code 1000; a close requested by the client still does not reconnect.
   `WsClosedEvent.isRemote()` tells who closed the connection.
 
-#### Upgrading from `2.0.0-beta.2`
+#### Upgrading from `2.0.0-beta.1`
 
 The changes above, plus:
 
