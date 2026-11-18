@@ -7,7 +7,10 @@ plugins {
 }
 
 group = 'com.scalbox'
-version = '2.0.0-alpha.7'
+// Release builds take the version from the Git tag (RELEASE_VERSION=v1.2.3, set by the workflows);
+// otherwise this default is used
+def releaseVersion = (System.getenv('RELEASE_VERSION') ?: '').trim().replaceFirst(/^v/, '')
+version = releaseVersion ?: '2.0.0-alpha.7'
 
 // Dependency versions
 ext {

@@ -8,6 +8,10 @@ on:
     tags:
       - 'v*'
 
+# On a tag (v1.2.3) build the artifacts with that version, so the release jars match the tag
+env:
+  RELEASE_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+
 jobs:
   run-ci:
     name: Run CI

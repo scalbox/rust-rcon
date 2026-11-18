@@ -1,17 +1,20 @@
 name: Publish to Maven Central
 
 on:
-  release:
-    types: [created]
-#  push:
-#    tags:
-#      - 'v*'
+  # Runs once per release: pushing a tag, or creating a release on GitHub (which pushes the tag), triggers it
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       version:
-        description: ''
+        description: 'Version to publish (e.g. 2.0.0-alpha.8). Empty = tag name or build.gradle version'
         required: false
         type: string
+
+# Version to publish: the pushed tag (v1.2.3 -> 1.2.3), or the manual input; empty = build.gradle default
+env:
+  RELEASE_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || inputs.version }}
 
 jobs:
   publish-to-maven-central:
