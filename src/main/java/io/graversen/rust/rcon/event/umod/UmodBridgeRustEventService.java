@@ -586,10 +586,16 @@ public class UmodBridgeRustEventService extends BaseEventHandler implements Rust
         return values;
     }
 
+    /**
+     * Converts a JSON object into a map of its properties, each value converted to text.
+     *
+     * @param value the JSON object, possibly {@code null}
+     * @return the properties by name; empty if {@code value} is {@code null} or not an object
+     */
     private Map<String, String> parseAttributes(JsonNode value) {
         final var attributes = new HashMap<String, String>();
         if (value != null && value.isObject()) {
-            value.fields().forEachRemaining(entry -> attributes.put(entry.getKey(), entry.getValue().asText()));
+            value.properties().forEach(entry -> attributes.put(entry.getKey(), entry.getValue().asText()));
         }
 
         return attributes;
