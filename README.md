@@ -77,7 +77,7 @@ implementation("com.scalbox:rust-rcon:2.0.0-beta.3")
 
 ### Upgrade notes
 
-#### Upgrading from `2.0.0-beta.3`
+#### Upgrading from `2.0.0-beta.2`
 
 - **Connection-lost detection**: it is now enabled by default. While connected, the client sends a ping every
   60 seconds; if no pong arrives within about 90 seconds, the connection is closed and `ReconnectingRustWebSocketClient`
